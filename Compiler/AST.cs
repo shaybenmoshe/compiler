@@ -392,10 +392,9 @@ namespace Compiler
         }
     }
 
-    public class ImmediateExpression : Expression
+    public partial class ImmediateExpression : Expression
     {
         private Token value;
-        private NameDefStatement ll1NameDef;
 
         public ImmediateExpression(int position, Token value) : base(position)
         {
@@ -406,13 +405,7 @@ namespace Compiler
         {
             get { return value; }
         }
-
-        public NameDefStatement LL1NameDef
-        {
-            get { return this.ll1NameDef; }
-            set { this.ll1NameDef = value; }
-        }
-
+        
         public override string ToString()
         {
             return this.value.ToString();

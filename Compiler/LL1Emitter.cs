@@ -58,6 +58,17 @@ namespace Compiler
         }
     }
 
+    public partial class ImmediateExpression : Expression
+    {
+        private NameDefStatement nameDef;
+        
+        public NameDefStatement NameDef
+        {
+            get { return this.nameDef; }
+            set { this.nameDef = value; }
+        }
+    }
+
     public partial class CallExpression : Expression
     {
         private FunctionStatement target;
@@ -133,7 +144,7 @@ namespace Compiler
                     nameToken.Position);
             }
 
-            immediateExpression.LL1NameDef = nameDef;
+            immediateExpression.NameDef = nameDef;
         }
     }
 }
