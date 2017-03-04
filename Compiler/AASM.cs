@@ -40,6 +40,11 @@ namespace Compiler
             {
                 this.function = function;
             }
+
+            public FunctionStatement Function
+            {
+                get { return this.function; }
+            }
         }
 
         public class AddSp : Opcode
@@ -49,6 +54,11 @@ namespace Compiler
             public AddSp(int offset)
             {
                 this.offset = offset;
+            }
+
+            public int Offset
+            {
+                get { return this.offset; }
             }
         }
 
@@ -60,6 +70,11 @@ namespace Compiler
             {
                 this.offset = offset;
             }
+
+            public int Offset
+            {
+                get { return this.offset; }
+            }
         }
 
         public class SetLocal : Opcode
@@ -70,6 +85,11 @@ namespace Compiler
             {
                 this.offset = offset;
             }
+
+            public int Offset
+            {
+                get { return this.offset; }
+            }
         }
 
         public class Push : Opcode
@@ -79,6 +99,11 @@ namespace Compiler
             public Push(uint value)
             {
                 this.value = value;
+            }
+
+            public uint Value
+            {
+                get { return this.value; }
             }
         }
 

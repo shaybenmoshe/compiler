@@ -40,7 +40,6 @@ namespace Compiler
             AASM.AASM aasm = new AASM.AASM();
             aasm.Add(new AASM.AddSp(this.llAASMSize));
             aasm.Add(this.body.LLAASMEmit());
-            aasm.Add(new AASM.AddSp(-this.llAASMSize));
             return aasm;
         }
     }
@@ -181,6 +180,7 @@ namespace Compiler
                 aasm.Add(this.parameters[i].LLAASMEmit());
             }
             aasm.Add(new AASM.Call(this.llTarget));
+            // @todo: clean stack
             return aasm;
         }
     }

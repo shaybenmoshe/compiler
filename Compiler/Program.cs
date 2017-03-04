@@ -16,7 +16,7 @@ function myfunc(x:uint32, y:uint32):uint32 {
     return x + y + z;
 }
 
-function main():void {
+function main():uint32 {
     var x:uint32 = 100;
     var y:uint32 = 8 + myfunc(1, 2) + 2;
     var z:uint32 = x + y;
@@ -29,6 +29,8 @@ function main():void {
         u = 100;
 
     y = 20;
+
+    return 0;
 }
 ";
 
@@ -55,8 +57,17 @@ function main():void {
                 LL ll = new LL(ast);
                 ll.Emit();
 
+                List<FunctionStatement> functions = ll.Functions;
 
-                List<byte> code = new List<byte>();
+                x86Emitter emitter = new x86Emitter(functions);
+                emitter.Emit();
+
+                PEFileBuilder peFileBuilder = new PEFileBuilder(emitter.X86, emitter.EntryPoint);
+                List<byte> peFile = peFileBuilder.Emit();
+                System.IO.File.WriteAllBytes("test.exe", peFile.ToArray());
+
+
+                /*List<byte> code = new List<byte>();
                 code.Add(0xcc);
                 code.Add(0xcc);
                 code.Add(0xcc);
@@ -66,7 +77,7 @@ function main():void {
                 code.Add(0xcc);
                 PEFileBuilder peFileBuilder = new PEFileBuilder(code, 4);
                 List<byte> peFile = peFileBuilder.Emit();
-                System.IO.File.WriteAllBytes("test.exe", peFile.ToArray());
+                System.IO.File.WriteAllBytes("test.exe", peFile.ToArray());*/
 
                 Console.WriteLine("Done");
             }

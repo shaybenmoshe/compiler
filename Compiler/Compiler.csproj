@@ -63,6 +63,7 @@
     <Compile Include="CompilerException.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="x86\PEFileBuilder.cs" />
+    <Compile Include="x86\x86EmitterFunction.cs" />
     <Compile Include="x86\x86Emitter.cs" />
   </ItemGroup>
   <ItemGroup>

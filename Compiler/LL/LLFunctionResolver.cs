@@ -8,6 +8,11 @@ namespace Compiler
     {
         private List<FunctionStatement> functions = new List<FunctionStatement>();
 
+        public List<FunctionStatement> Functions
+        {
+            get { return this.functions; }
+        }
+
         private void FunctionResolver()
         {
             CompoundStatement topLevel = this.ast.TopLevel;
