@@ -133,7 +133,8 @@ namespace Compiler
             {
                 skippedAny = false;
                 skippedAny |= this.SkipWhiteChars();
-                skippedAny |= this.SkipComment();
+                skippedAny |= this.SkipOneLineComment();
+                skippedAny |= this.SkipMultiLineComment();
             } while (skippedAny);
         }
 
@@ -155,7 +156,7 @@ namespace Compiler
             return skippedAny;
         }
 
-        private bool SkipComment()
+        private bool SkipOneLineComment()
         {
             if (!this.inputStream.PeekNextIs("//"))
             {
@@ -168,6 +169,27 @@ namespace Compiler
                 char cur = this.inputStream.PeekNext();
                 if (cur == '\n' || cur == '\r')
                 {
+                    break;
+                }
+                this.inputStream.Next();
+            }
+
+            return true;
+        }
+
+        private bool SkipMultiLineComment()
+        {
+            if (!this.inputStream.PeekNextIs("/*"))
+            {
+                return false;
+            }
+            
+            while (!this.inputStream.Ended())
+            {
+                if (this.inputStream.PeekNextIs("*/"))
+                {
+                    this.inputStream.Next();
+                    this.inputStream.Next();
                     break;
                 }
                 this.inputStream.Next();
