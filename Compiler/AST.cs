@@ -41,16 +41,8 @@ namespace Compiler
 
     public class Statement : PositionThing
     {
-        private Statement parent;
-
         public Statement(int position) : base(position)
         {
-        }
-
-        public Statement Parent
-        {
-            get { return this.parent; }
-            set { this.parent = value; }
         }
 
         public virtual void TraverseStatements(Action<Statement> cb)
@@ -79,7 +71,6 @@ namespace Compiler
         public void Add(Statement statement)
         {
             this.statements.Add(statement);
-            statement.Parent = this;
         }
 
         public override void TraverseStatements(Action<Statement> cb)
@@ -153,9 +144,6 @@ namespace Compiler
         {
             this.nameDef = nameDef;
             this.value = value;
-
-            this.nameDef.Parent = this;
-            this.value.ParentStatement = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
@@ -177,8 +165,6 @@ namespace Compiler
         public ReturnStatement(int position, Expression value) : base(position)
         {
             this.value = value;
-
-            this.value.ParentStatement = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
@@ -204,10 +190,6 @@ namespace Compiler
             this.cond = cond;
             this.body = body;
             this.elseBody = elseBody;
-
-            this.cond.ParentStatement = this;
-            this.body.Parent = this;
-            this.elseBody.Parent = this;
         }
 
         public override void TraverseStatements(Action<Statement> cb)
@@ -265,12 +247,6 @@ namespace Compiler
             this.retType = retType;
             this.arguments = arguments;
             this.body = body;
-
-            for (int i = 0; i < this.arguments.Count; i++)
-            {
-                this.arguments[i].Parent = this;
-            }
-            this.body.Parent = this;
         }
 
         public override void TraverseStatements(Action<Statement> cb)
@@ -321,8 +297,6 @@ namespace Compiler
         public ExpressionStatement(int position, Expression expression) : base(position)
         {
             this.expression = expression;
-
-            this.expression.ParentStatement = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
@@ -344,23 +318,8 @@ namespace Compiler
 
     public class Expression : PositionThing
     {
-        private Statement parentStatement;
-        private Expression parentExpression;
-
         public Expression(int position) : base(position)
         {
-        }
-
-        public Statement ParentStatement
-        {
-            get { return this.parentStatement; }
-            set { this.parentStatement = value; }
-        }
-
-        public Expression ParentExpression
-        {
-            get { return this.parentExpression; }
-            set { this.parentExpression = value; }
         }
 
         public virtual void TraverseExpressions(Action<Expression> cb)
@@ -376,8 +335,6 @@ namespace Compiler
         public ParentheseExpression(int position, Expression value) : base(position)
         {
             this.value = value;
-
-            this.value.ParentExpression = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
@@ -428,11 +385,6 @@ namespace Compiler
         {
             this.name = name;
             this.parameters = parameters;
-
-            for (int i = 0; i < this.parameters.Count; i++)
-            {
-                this.parameters[i].ParentExpression = this;
-            }
         }
 
         public NameToken Name
@@ -485,9 +437,6 @@ namespace Compiler
             this.binaryOpToken = binaryOpToken;
             this.operand1 = operand1;
             this.operand2 = operand2;
-
-            this.operand1.ParentExpression = this;
-            this.operand2.ParentExpression = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
