@@ -52,8 +52,8 @@ function main():void {
 
                 //Console.WriteLine(ast.TopLevel.ToString());
 
-                LL1 ll1Emitter = new LL1(ast);
-                ll1Emitter.Emit();
+                LL ll = new LL(ast);
+                ll.Emit();
 
                 Console.WriteLine("Done");
             }
