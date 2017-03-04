@@ -34,9 +34,23 @@ namespace Compiler
         }
     }
 
+
+
+
+
+
     public class Statement : PositionThing
     {
         public Statement(int position) : base(position)
+        {
+        }
+
+        public virtual void TraverseStatements(Action<Statement> cb)
+        {
+            cb(this);
+        }
+
+        public virtual void TraverseExpressions(Action<Expression> cb)
         {
         }
     }
@@ -57,6 +71,24 @@ namespace Compiler
         public void Add(Statement statement)
         {
             this.statements.Add(statement);
+        }
+
+        public override void TraverseStatements(Action<Statement> cb)
+        {
+            base.TraverseStatements(cb);
+            for (int i = 0; i < this.statements.Count; i++)
+            {
+                this.statements[i].TraverseStatements(cb);
+            }
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            for (int i = 0; i < this.statements.Count; i++)
+            {
+                this.statements[i].TraverseExpressions(cb);
+            }
         }
 
         public override string ToString()
@@ -98,10 +130,21 @@ namespace Compiler
         private NameDefStatement nameDef;
         private Expression value;
 
+        public NameDefStatement NameDef
+        {
+            get { return this.nameDef; }
+        }
+
         public VarStatement(int position, NameDefStatement nameDef, Expression value) : base(position)
         {
             this.nameDef = nameDef;
             this.value = value;
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            this.value.TraverseExpressions(cb);
         }
 
         public override string ToString()
@@ -117,6 +160,12 @@ namespace Compiler
         public ReturnStatement(int position, Expression value) : base(position)
         {
             this.value = value;
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            this.value.TraverseExpressions(cb);
         }
 
         public override string ToString()
@@ -136,6 +185,27 @@ namespace Compiler
             this.cond = cond;
             this.body = body;
             this.elseBody = elseBody;
+        }
+
+        public override void TraverseStatements(Action<Statement> cb)
+        {
+            base.TraverseStatements(cb);
+            this.body.TraverseStatements(cb);
+            if (elseBody != null)
+            {
+                this.elseBody.TraverseStatements(cb);
+            }
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            this.cond.TraverseExpressions(cb);
+            this.body.TraverseExpressions(cb);
+            if (elseBody != null)
+            {
+                this.elseBody.TraverseExpressions(cb);
+            }
         }
 
         public override string ToString()
@@ -162,6 +232,26 @@ namespace Compiler
             this.retType = retType;
             this.arguments = arguments;
             this.body = body;
+        }
+
+        public override void TraverseStatements(Action<Statement> cb)
+        {
+            base.TraverseStatements(cb);
+            this.body.TraverseStatements(cb);
+            for (int i = 0; i < this.arguments.Count; i++)
+            {
+                this.arguments[i].TraverseStatements(cb);
+            }
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            this.body.TraverseExpressions(cb);
+            for (int i = 0; i < this.arguments.Count; i++)
+            {
+                this.arguments[i].TraverseExpressions(cb);
+            }
         }
 
         public override string ToString()
@@ -194,16 +284,32 @@ namespace Compiler
             this.expression = expression;
         }
 
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            this.expression.TraverseExpressions(cb);
+        }
+
         public override string ToString()
         {
             return this.expression.ToString() + ";";
         }
     }
 
+
+
+
+
+
     public class Expression : PositionThing
     {
         public Expression(int position) : base(position)
         {
+        }
+
+        public virtual void TraverseExpressions(Action<Expression> cb)
+        {
+            cb(this);
         }
     }
 
@@ -214,6 +320,12 @@ namespace Compiler
         public ParentheseExpression(int position, Expression value) : base(position)
         {
             this.value = value;
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            this.value.TraverseExpressions(cb);
         }
 
         public override string ToString()
@@ -248,6 +360,15 @@ namespace Compiler
             this.parameters = parameters;
         }
 
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            for (int i = 0; i < this.parameters.Count; i++)
+            {
+                this.parameters[i].TraverseExpressions(cb);
+            }
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -279,6 +400,13 @@ namespace Compiler
             this.binaryOpToken = binaryOpToken;
             this.operand1 = operand1;
             this.operand2 = operand2;
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            this.operand1.TraverseExpressions(cb);
+            this.operand2.TraverseExpressions(cb);
         }
 
         public override string ToString()

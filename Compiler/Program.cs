@@ -28,6 +28,7 @@ function main():void {
 
     if(x > y) {
         t = 3000;
+        var lolz:uint32 = 1;
     }
     else
         t = 100;
@@ -54,7 +55,10 @@ function main():void {
                 Parser parser = new Parser(tokenStream);
                 AST ast = parser.ParseAll();
 
-                Console.WriteLine(ast.TopLevel.ToString());
+                //Console.WriteLine(ast.TopLevel.ToString());
+
+                LL1Emitter ll1Emitter = new LL1Emitter(ast);
+                ll1Emitter.Emit();
 
                 Console.WriteLine("Done");
             }
