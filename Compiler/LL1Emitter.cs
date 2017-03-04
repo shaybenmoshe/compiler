@@ -47,7 +47,7 @@ namespace Compiler
             {
                 if (this.functions[i].Name.Value == callExpression.Name.Value)
                 {
-                    callExpression.Target = this.functions[i];
+                    callExpression.LL1Target = this.functions[i];
                     return;
                 }
             }
@@ -59,18 +59,18 @@ namespace Compiler
 
     public partial class CallExpression : Expression
     {
-        private FunctionStatement target;
+        private FunctionStatement ll1Target;
 
-        public FunctionStatement Target
+        public FunctionStatement LL1Target
         {
-            get { return this.target; }
-            set { this.target = value; }
+            get { return this.ll1Target; }
+            set { this.ll1Target = value; }
         }
     }
 
     public partial class FunctionStatement : Statement
     {
-        private List<NameDefStatement> locals = new List<NameDefStatement>();
+        private List<NameDefStatement> ll1Locals = new List<NameDefStatement>();
 
         public void LL1Prepare()
         {
@@ -92,12 +92,12 @@ namespace Compiler
                 throw new CompilerException("Name `" + varStatement.NameDef.Name.Value + "` is already an argument.", varStatement.Position);
             }
 
-            if (Utils.FindNameDefsList(this.locals, varStatement.NameDef.Name) != null)
+            if (Utils.FindNameDefsList(this.ll1Locals, varStatement.NameDef.Name) != null)
             {
                 throw new CompilerException("Name `" + varStatement.NameDef.Name.Value + "` is already a local.", varStatement.Position);
             }
 
-            this.locals.Add(varStatement.NameDef);
+            this.ll1Locals.Add(varStatement.NameDef);
         }
 
         private void LL1RenewLocalOrArgument(Expression expression)
@@ -113,7 +113,7 @@ namespace Compiler
 
             if (nameDef == null)
             {
-                nameDef = Utils.FindNameDefsList(this.locals, immediateExpression.Value);
+                nameDef = Utils.FindNameDefsList(this.ll1Locals, immediateExpression.Value);
             }
             if (nameDef == null)
             {
@@ -125,18 +125,18 @@ namespace Compiler
                     immediateExpression.Value.Position);
             }
 
-            immediateExpression.NameDef = nameDef;
+            immediateExpression.LL1NameDef = nameDef;
         }
     }
 
     public partial class NameExpression : ImmediateExpression<NameToken>
     {
-        public NameDefStatement nameDef;
+        public NameDefStatement ll1NameDef;
 
-        public NameDefStatement NameDef
+        public NameDefStatement LL1NameDef
         {
-            get { return this.nameDef; }
-            set { this.nameDef = value; }
+            get { return this.ll1NameDef; }
+            set { this.ll1NameDef = value; }
         }
     }
 }
