@@ -18,5 +18,26 @@ namespace Compiler
             }
             return null;
         }
+
+        public static void Write(List<byte> list, uint value, int size)
+        {
+            while (size > 0)
+            {
+                list.Add((byte)(value & 0xff));
+                value >>= 8;
+                size--;
+            }
+        }
+
+        public static void Rewrite(List<byte> list, uint value, int size, int offset)
+        {
+            while (size > 0)
+            {
+                list[offset] = (byte)(value & 0xff);
+                value >>= 8;
+                size--;
+                offset++;
+            }
+        }
     }
 }

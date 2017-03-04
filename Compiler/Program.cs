@@ -55,6 +55,19 @@ function main():void {
                 LL ll = new LL(ast);
                 ll.Emit();
 
+
+                List<byte> code = new List<byte>();
+                code.Add(0xcc);
+                code.Add(0xcc);
+                code.Add(0xcc);
+                code.Add(0x90);
+                code.Add(0xcc);
+                code.Add(0xcc);
+                code.Add(0xcc);
+                PEFileBuilder peFileBuilder = new PEFileBuilder(code, 4);
+                List<byte> peFile = peFileBuilder.Emit();
+                System.IO.File.WriteAllBytes("test.exe", peFile.ToArray());
+
                 Console.WriteLine("Done");
             }
             catch (CompilerException e)
