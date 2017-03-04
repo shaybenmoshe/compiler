@@ -21,16 +21,12 @@ function main():void {
     var y:uint32 = 8 + myfunc(1, 2) + 2;
     var z:uint32 = x + y;
     var u:uint32 = 1 + ((2 + 3) + (4 + (5 + 6)) + 7 + 8) + 9;
-    var s:string = ""waaa
-
-    this is multiline
-    "";
 
     if(x > y) {
         var lolz:uint32 = 1;
     }
     else
-        s = 100;
+        u = 100;
 
     y = 20;
 }
