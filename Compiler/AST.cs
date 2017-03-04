@@ -38,22 +38,52 @@ namespace Compiler
         }
     }
 
-    public class VarStatement : Statement
+    public class NameDefStatement : Statement
     {
         private NameToken name;
         private NameToken type;
-        private Expression value;
 
-        public VarStatement(NameToken name, NameToken type, Expression value)
+        public NameDefStatement(NameToken name, NameToken type)
         {
             this.name = name;
             this.type = type;
+        }
+
+        public override string ToString()
+        {
+            return this.name.ToString() + ":" + this.type.ToString();
+        }
+    }
+
+    public class VarStatement : Statement
+    {
+        private NameDefStatement nameDef;
+        private Expression value;
+
+        public VarStatement(NameDefStatement nameDef, Expression value)
+        {
+            this.nameDef = nameDef;
             this.value = value;
         }
 
         public override string ToString()
         {
-            return "var " + this.name.ToString() + ":" + this.type.ToString() + " = " + this.value.ToString() + ";";
+            return "var " + this.nameDef.ToString() + " = " + this.value.ToString() + ";";
+        }
+    }
+
+    public class ReturnStatement : Statement
+    {
+        private Expression value;
+
+        public ReturnStatement(Expression value)
+        {
+            this.value = value;
+        }
+
+        public override string ToString()
+        {
+            return "return " + this.value.ToString() + ";";
         }
     }
 
@@ -78,6 +108,42 @@ namespace Compiler
                 s += "\r\nelse " + this.elseBody.ToString();
             }
             return s;
+        }
+    }
+
+    public class FunctionStatement : Statement
+    {
+        private NameToken name;
+        private NameToken retType;
+        private List<NameDefStatement> arguments;
+        private Statement body;
+
+        public FunctionStatement(NameToken name, NameToken retType, List<NameDefStatement> arguments, Statement body)
+        {
+            this.name = name;
+            this.retType = retType;
+            this.arguments = arguments;
+            this.body = body;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("function " + this.name.ToString() + "(");
+            for (int i = 0; i < this.arguments.Count; i++)
+            {
+                string p = this.arguments[i].ToString();
+                if (i > 0)
+                {
+                    sb.Append(",");
+                }
+                sb.Append(p);
+            }
+            sb.Append("): " + this.retType.ToString());
+            sb.Append(this.body);
+
+            return sb.ToString();
         }
     }
 

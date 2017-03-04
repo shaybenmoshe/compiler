@@ -41,10 +41,21 @@ namespace Compiler
                 return statement;
             }
 
+            if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.Return))
+            {
+                statement = this.ParseReturn();
+                this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Semicolon);
+                return statement;
+            }
+
             if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.If))
             {
-                statement = this.ParseIfElse();
-                return statement;
+                return this.ParseIfElse();
+            }
+
+            if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.Function))
+            {
+                return this.ParseFunction();
             }
 
             Expression expression = this.TryParseExpression();
@@ -142,53 +153,12 @@ namespace Compiler
 
         private CallExpression ParseCall()
         {
-            int startPosition = this.tokenStream.TokenPosition;
-
             NameToken func = this.tokenStream.NextName();
+
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LParenthese);
+            List<Expression> parameters = this.ParseParantheseCommaList<Expression>(this.tokenStream.TokenPosition, this.ParseExpression);
+            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RParenthese);
 
-            List<Expression> parameters = new List<Expression>();
-            bool first = true;
-            while (!this.tokenStream.Ended())
-            {
-                // If first, check for ).
-                if (first)
-                {
-                    if (this.tokenStream.PeekNextIsType(Token.Types.Punct))
-                    {
-                        this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RParenthese);
-                        goto createCallStatement;
-                    }
-                }
-                // If not first, ensure , or ).
-                else
-                {
-                    int punctPosition = this.tokenStream.TokenPosition;
-                    if (!this.tokenStream.PeekNextIsType(Token.Types.Punct))
-                    {
-                        throw new CompilerException("Expected punct", punctPosition);
-                    }
-
-                    PunctToken token = this.tokenStream.Next() as PunctToken;
-
-                    if (token.Value == PunctToken.Puncts.RParenthese)
-                    {
-                        goto createCallStatement;
-                    }
-
-                    if (!first && token.Value != PunctToken.Puncts.Comma)
-                    {
-                        throw new CompilerException("Expected either , or (.", punctPosition);
-                    }
-                }
-
-                parameters.Add(this.ParseExpression());
-                first = false;
-            }
-
-            throw new CompilerException("Unfinished function call.", startPosition);
-
-        createCallStatement:
             return new CallExpression(func, parameters);
         }
 
@@ -232,13 +202,68 @@ namespace Compiler
         {
             this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Var);
 
-            NameToken name = this.tokenStream.NextName();
-            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Colon);
-            NameToken type = this.tokenStream.NextName();
+            NameDefStatement nameDef = this.ParseNameDef();
             this.tokenStream.EnsureNextIsOp(BinaryOpToken.Ops.Ass);
             Expression value = this.ParseExpression();
 
-            return new VarStatement(name, type, value);
+            return new VarStatement(nameDef, value);
+        }
+
+        private ReturnStatement ParseReturn()
+        {
+            this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Return);
+            Expression value = this.ParseExpression();
+            return new ReturnStatement(value);
+        }
+
+        private FunctionStatement ParseFunction()
+        {
+            this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Function);
+
+            NameToken name = this.tokenStream.NextName();
+            
+            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LParenthese);
+            List<NameDefStatement> arguments = this.ParseParantheseCommaList<NameDefStatement>(this.tokenStream.TokenPosition, this.ParseNameDef);
+            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RParenthese);
+
+            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Colon);
+            NameToken retType = this.tokenStream.NextName();
+
+            Statement body = this.ParseNext();
+
+            return new FunctionStatement(name, retType, arguments, body);
+        }
+
+        private NameDefStatement ParseNameDef()
+        {
+            NameToken name = this.tokenStream.NextName();
+            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Colon);
+            NameToken type = this.tokenStream.NextName();
+
+            return new NameDefStatement(name, type);
+        }
+
+        private List<T> ParseParantheseCommaList<T>(int startPosition, Func<T> cb)
+        {
+            List<T> list = new List<T>();
+            bool first = true;
+            while (!this.tokenStream.Ended())
+            {
+                if (this.tokenStream.PeekNextIsPunct(PunctToken.Puncts.RParenthese))
+                {
+                    return list;
+                }
+                
+                if (!first)
+                {
+                    this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Comma);
+                }
+                first = false;
+
+                list.Add(cb());
+            }
+
+            throw new CompilerException("Unfinished function call.", startPosition);
         }
     }
 }

@@ -78,6 +78,8 @@ namespace Compiler
             if (this.inputStream.NextIs("var")) { return new KeywordToken(startPos, KeywordToken.Keywords.Var); }
             if (this.inputStream.NextIs("if")) { return new KeywordToken(startPos, KeywordToken.Keywords.If); }
             if (this.inputStream.NextIs("else")) { return new KeywordToken(startPos, KeywordToken.Keywords.Else); }
+            if (this.inputStream.NextIs("function")) { return new KeywordToken(startPos, KeywordToken.Keywords.Function); }
+            if (this.inputStream.NextIs("return")) { return new KeywordToken(startPos, KeywordToken.Keywords.Return); }
 
             // Name.
             if (this.ValidNameFirstChar(this.inputStream.PeekNext()))

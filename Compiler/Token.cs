@@ -186,6 +186,8 @@ namespace Compiler
             Var,
             If,
             Else,
+            Function,
+            Return,
         }
 
         private Keywords value;
@@ -215,6 +217,10 @@ namespace Compiler
                     return "if ";
                 case Keywords.Else:
                     return "else ";
+                case Keywords.Function:
+                    return "function ";
+                case Keywords.Return:
+                    return "return ";
             }
 
             throw new Exception("Invalid BinaryOp type");

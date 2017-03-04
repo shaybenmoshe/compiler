@@ -11,6 +11,11 @@ namespace Compiler
         static void Main(string[] args)
         {
             string input = @"
+function myfunc(x:uint32, y:uint32):uint32 {
+    var z:uint32 = 3;
+    return x + y + z;
+}
+
 var x:uint32 = 100;
 var y:uint32 = 8 + myfunc(1, 2, otherCall()) + 2;
 var z:uint32 = x + y;
