@@ -55,12 +55,16 @@ namespace Compiler
             this.alignToSecionAlignment();
             int afterCode = this.output.Count;
 
+            uint codeSize = (uint)(afterCode - this.codeOffset);
+
+            uint sizeOfImage = codeRVA + codeSize;
+
             Utils.Rewrite(this.output, (uint)(afterOptionalHeaders - beforeOptionalHeaders), 2, this.offsetSizeOfOptionalHeaders);
-            Utils.Rewrite(this.output, (uint)this.output.Count, 4, this.offsetSizeOfImage);
+            Utils.Rewrite(this.output, sizeOfImage, 4, this.offsetSizeOfImage);
             Utils.Rewrite(this.output, this.sizeOfHeaders, 4, this.offsetSizeOfHeaders);
             Utils.Rewrite(this.output, this.codeOffset, 4, this.offsetCodeOffset);
-            Utils.Rewrite(this.output, (uint)(afterCode - this.codeOffset), 4, this.offsetCodeDiskSize);
-            Utils.Rewrite(this.output, (uint)(afterCode - this.codeOffset), 4, this.offsetCodeDiskSize2);
+            Utils.Rewrite(this.output, codeSize, 4, this.offsetCodeDiskSize);
+            Utils.Rewrite(this.output, codeSize, 4, this.offsetCodeDiskSize2);
 
             return this.output;
         }
