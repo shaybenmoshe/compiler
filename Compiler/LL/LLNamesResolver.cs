@@ -35,15 +35,15 @@ namespace Compiler
 
             if (nameDef == null)
             {
-                nameDef = Utils.FindNameDefsList(this.llLocals, immediateExpression.Value);
+                nameDef = Utils.FindNameDefsList(this.llLocals, immediateExpression.NameValue);
             }
             if (nameDef == null)
             {
-                nameDef = Utils.FindNameDefsList(this.arguments, immediateExpression.Value);
+                nameDef = Utils.FindNameDefsList(this.arguments, immediateExpression.NameValue);
             }
             if (nameDef == null)
             {
-                throw new CompilerException("Name `" + immediateExpression.Value.Value + "` is not a name of an argument or a local.",
+                throw new CompilerException("Name `" + immediateExpression.NameValue.Value + "` is not a name of an argument or a local.",
                     immediateExpression.Value.Position);
             }
 
@@ -51,7 +51,7 @@ namespace Compiler
         }
     }
 
-    public partial class NameExpression : ImmediateExpression<NameToken>
+    public partial class NameExpression : ImmediateExpression
     {
         private NameDefStatement llNameDef;
 

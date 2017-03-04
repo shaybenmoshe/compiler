@@ -39,7 +39,7 @@ namespace Compiler
 
 
 
-    public class Statement : PositionThing
+    public partial class Statement : PositionThing
     {
         public Statement(int position) : base(position)
         {
@@ -55,7 +55,7 @@ namespace Compiler
         }
     }
 
-    public class CompoundStatement : Statement
+    public partial class CompoundStatement : Statement
     {
         List<Statement> statements = new List<Statement>();
 
@@ -108,7 +108,7 @@ namespace Compiler
         }
     }
 
-    public class NameDefStatement : Statement
+    public partial class NameDefStatement : Statement
     {
         private NameToken name;
         private NameToken type;
@@ -124,13 +124,19 @@ namespace Compiler
             get { return name; }
         }
 
+        public NameToken Type
+        {
+            get { return type; }
+            set { type = value; }
+        }
+
         public override string ToString()
         {
             return this.name.ToString() + ":" + this.type.ToString();
         }
     }
 
-    public class VarStatement : Statement
+    public partial class VarStatement : Statement
     {
         private NameDefStatement nameDef;
         private Expression value;
@@ -158,7 +164,7 @@ namespace Compiler
         }
     }
 
-    public class ReturnStatement : Statement
+    public partial class ReturnStatement : Statement
     {
         private Expression value;
 
@@ -179,7 +185,7 @@ namespace Compiler
         }
     }
 
-    public class IfElseStatement : Statement
+    public partial class IfElseStatement : Statement
     {
         private Expression cond;
         private Statement body;
@@ -290,7 +296,7 @@ namespace Compiler
         }
     }
 
-    public class ExpressionStatement : Statement
+    public partial class ExpressionStatement : Statement
     {
         private Expression expression;
 
@@ -316,7 +322,7 @@ namespace Compiler
 
 
 
-    public class Expression : PositionThing
+    public partial class Expression : PositionThing
     {
         public Expression(int position) : base(position)
         {
@@ -328,7 +334,7 @@ namespace Compiler
         }
     }
 
-    public class ParentheseExpression : Expression
+    public partial class ParentheseExpression : Expression
     {
         private Expression value;
 
@@ -349,18 +355,18 @@ namespace Compiler
         }
     }
 
-    public class ImmediateExpression<T> : Expression where T : Token
+    public partial class ImmediateExpression : Expression
     {
-        private T value;
+        private Token value;
 
-        public ImmediateExpression(int position, T value) : base(position)
+        public ImmediateExpression(int position, Token value) : base(position)
         {
             this.value = value;
         }
 
-        public T Value
+        public Token Value
         {
-            get { return value; }
+            get { return this.value; }
         }
 
         public override string ToString()
@@ -369,8 +375,13 @@ namespace Compiler
         }
     }
 
-    public partial class NameExpression : ImmediateExpression<NameToken>
+    public partial class NameExpression : ImmediateExpression
     {
+        public NameToken NameValue
+        {
+            get { return this.Value as NameToken; }
+        }
+
         public NameExpression(int position, NameToken value) : base(position, value)
         {
         }
@@ -426,7 +437,7 @@ namespace Compiler
         }
     }
 
-    public class BinaryOpExpression : Expression
+    public partial class BinaryOpExpression : Expression
     {
         private BinaryOpToken binaryOpToken;
         private Expression operand1;

@@ -81,7 +81,7 @@ namespace Compiler
                     return ",";
             }
 
-            throw new Exception("Invalid Punct type");
+            throw new CompilerException("Invalid Punct type", this.Position);
         }
     }
 
@@ -135,7 +135,7 @@ namespace Compiler
                     return " <= ";
             }
 
-            throw new Exception("Invalid BinaryOp type");
+            throw new CompilerException("Invalid BinaryOp type", this.Position);
         }
     }
 
@@ -223,7 +223,7 @@ namespace Compiler
                     return "return ";
             }
 
-            throw new Exception("Invalid BinaryOp type");
+            throw new CompilerException("Invalid BinaryOp type", this.Position);
         }
     }
 
@@ -264,6 +264,11 @@ namespace Compiler
         public override Token.Types Type
         {
             get { return Token.Types.Number; }
+        }
+
+        public uint Value
+        {
+            get { return this.value; }
         }
 
         public override string ToString()

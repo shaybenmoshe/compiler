@@ -148,13 +148,14 @@ namespace Compiler
                 return this.ParseCall();
             }
 
-            if (this.tokenStream.PeekNextIsType(Token.Types.String))
+            // @todo
+            /*if (this.tokenStream.PeekNextIsType(Token.Types.String))
             {
-                return new ImmediateExpression<StringToken>(startPosition, this.tokenStream.Next() as StringToken);
-            }
+                return new ImmediateExpression(startPosition, this.tokenStream.Next());
+            }*/
             if (this.tokenStream.PeekNextIsType(Token.Types.Number))
             {
-                return new ImmediateExpression<NumberToken>(startPosition, this.tokenStream.Next() as NumberToken);
+                return new ImmediateExpression(startPosition, this.tokenStream.Next());
             }
             if (this.tokenStream.PeekNextIsType(Token.Types.Name))
             {

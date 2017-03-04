@@ -18,6 +18,10 @@ namespace Compiler
             this.FunctionResolver();
             this.LLLocalsResolver();
             this.LLNamesResolver();
+
+            this.LLAASMTypeResolver();
+            this.LLAASMStackOffsets();
+            this.LLAASMEmit();
         }
     }
 }

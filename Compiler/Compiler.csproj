@@ -45,9 +45,12 @@
   <ItemGroup>
     <Compile Include="AASM.cs" />
     <Compile Include="LL\LL.cs" />
+    <Compile Include="LL\LLASM\LLAASMStackOffsets.cs" />
+    <Compile Include="LL\LLASM\LLAASMEmitter.cs" />
+    <Compile Include="LL\LLASM\LLAASMTypeResolver.cs" />
     <Compile Include="LL\LLFunctionResolver.cs" />
     <Compile Include="LL\LLLocalsResolver.cs" />
-    <Compile Include="Types.cs" />
+    <Compile Include="AASMTypes.cs" />
     <Compile Include="LL\LLNamesResolver.cs" />
     <Compile Include="AST.cs" />
     <Compile Include="Utils.cs" />
