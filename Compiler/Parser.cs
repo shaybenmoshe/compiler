@@ -160,13 +160,13 @@ namespace Compiler
         {
             int startPosition = this.tokenStream.TokenPosition;
 
-            NameToken func = this.tokenStream.NextName();
+            NameToken name = this.tokenStream.NextName();
 
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LParenthese);
             List<Expression> parameters = this.ParseParantheseCommaList<Expression>(this.tokenStream.TokenPosition, this.ParseExpression);
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RParenthese);
 
-            return new CallExpression(startPosition, func, parameters);
+            return new CallExpression(startPosition, name, parameters);
         }
 
         private IfElseStatement ParseIfElse()

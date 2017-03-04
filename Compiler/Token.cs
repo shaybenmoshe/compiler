@@ -241,6 +241,11 @@ namespace Compiler
             get { return Token.Types.Name; }
         }
 
+        public string Value
+        {
+            get { return value; }
+        }
+
         public override string ToString()
         {
             return this.value;

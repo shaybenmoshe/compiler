@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="LL1Emitter.cs" />
     <Compile Include="AST.cs" />
+    <Compile Include="Utils.cs" />
     <Compile Include="TokenStream.cs" />
     <Compile Include="InputStream.cs" />
     <Compile Include="Parser.cs" />

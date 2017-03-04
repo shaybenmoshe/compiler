@@ -18,7 +18,7 @@ function myfunc(x:uint32, y:uint32):uint32 {
 
 function main():void {
     var x:uint32 = 100;
-    var y:uint32 = 8 + myfunc(1, 2, otherCall()) + 2;
+    var y:uint32 = 8 + myfunc(1, 2) + 2;
     var z:uint32 = x + y;
     var u:uint32 = 1 + ((2 + 3) + (4 + (5 + 6)) + 7 + 8) + 9;
     var s:string = ""waaa
@@ -27,11 +27,10 @@ function main():void {
     "";
 
     if(x > y) {
-        t = 3000;
         var lolz:uint32 = 1;
     }
     else
-        t = 100;
+        s = 100;
 
     y = 20;
 }

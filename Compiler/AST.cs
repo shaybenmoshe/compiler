@@ -41,8 +41,16 @@ namespace Compiler
 
     public class Statement : PositionThing
     {
+        private Statement parent;
+
         public Statement(int position) : base(position)
         {
+        }
+
+        public Statement Parent
+        {
+            get { return this.parent; }
+            set { this.parent = value; }
         }
 
         public virtual void TraverseStatements(Action<Statement> cb)
@@ -71,6 +79,7 @@ namespace Compiler
         public void Add(Statement statement)
         {
             this.statements.Add(statement);
+            statement.Parent = this;
         }
 
         public override void TraverseStatements(Action<Statement> cb)
@@ -119,6 +128,11 @@ namespace Compiler
             this.type = type;
         }
 
+        public NameToken Name
+        {
+            get { return name; }
+        }
+
         public override string ToString()
         {
             return this.name.ToString() + ":" + this.type.ToString();
@@ -139,6 +153,9 @@ namespace Compiler
         {
             this.nameDef = nameDef;
             this.value = value;
+
+            this.nameDef.Parent = this;
+            this.value.ParentStatement = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
@@ -160,6 +177,8 @@ namespace Compiler
         public ReturnStatement(int position, Expression value) : base(position)
         {
             this.value = value;
+
+            this.value.ParentStatement = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
@@ -185,6 +204,10 @@ namespace Compiler
             this.cond = cond;
             this.body = body;
             this.elseBody = elseBody;
+
+            this.cond.ParentStatement = this;
+            this.body.Parent = this;
+            this.elseBody.Parent = this;
         }
 
         public override void TraverseStatements(Action<Statement> cb)
@@ -219,12 +242,22 @@ namespace Compiler
         }
     }
 
-    public class FunctionStatement : Statement
+    public partial class FunctionStatement : Statement
     {
         private NameToken name;
         private NameToken retType;
         private List<NameDefStatement> arguments;
         private Statement body;
+        
+        public NameToken Name
+        {
+            get { return this.name; }
+        }
+
+        public List<NameDefStatement> Arguments
+        {
+            get { return this.arguments; }
+        }
 
         public FunctionStatement(int position, NameToken name, NameToken retType, List<NameDefStatement> arguments, Statement body) : base(position)
         {
@@ -232,6 +265,12 @@ namespace Compiler
             this.retType = retType;
             this.arguments = arguments;
             this.body = body;
+
+            for (int i = 0; i < this.arguments.Count; i++)
+            {
+                this.arguments[i].Parent = this;
+            }
+            this.body.Parent = this;
         }
 
         public override void TraverseStatements(Action<Statement> cb)
@@ -282,6 +321,8 @@ namespace Compiler
         public ExpressionStatement(int position, Expression expression) : base(position)
         {
             this.expression = expression;
+
+            this.expression.ParentStatement = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
@@ -303,8 +344,23 @@ namespace Compiler
 
     public class Expression : PositionThing
     {
+        private Statement parentStatement;
+        private Expression parentExpression;
+
         public Expression(int position) : base(position)
         {
+        }
+
+        public Statement ParentStatement
+        {
+            get { return this.parentStatement; }
+            set { this.parentStatement = value; }
+        }
+
+        public Expression ParentExpression
+        {
+            get { return this.parentExpression; }
+            set { this.parentExpression = value; }
         }
 
         public virtual void TraverseExpressions(Action<Expression> cb)
@@ -320,6 +376,8 @@ namespace Compiler
         public ParentheseExpression(int position, Expression value) : base(position)
         {
             this.value = value;
+
+            this.value.ParentExpression = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
@@ -337,10 +395,22 @@ namespace Compiler
     public class ImmediateExpression : Expression
     {
         private Token value;
+        private NameDefStatement ll1NameDef;
 
         public ImmediateExpression(int position, Token value) : base(position)
         {
             this.value = value;
+        }
+
+        public Token Value
+        {
+            get { return value; }
+        }
+
+        public NameDefStatement LL1NameDef
+        {
+            get { return this.ll1NameDef; }
+            set { this.ll1NameDef = value; }
         }
 
         public override string ToString()
@@ -349,15 +419,30 @@ namespace Compiler
         }
     }
 
-    public class CallExpression : Expression
+    public partial class CallExpression : Expression
     {
-        private NameToken func;
+        private NameToken name;
         private List<Expression> parameters;
 
-        public CallExpression(int position, NameToken func, List<Expression> parameters) : base(position)
+        public CallExpression(int position, NameToken name, List<Expression> parameters) : base(position)
         {
-            this.func = func;
+            this.name = name;
             this.parameters = parameters;
+
+            for (int i = 0; i < this.parameters.Count; i++)
+            {
+                this.parameters[i].ParentExpression = this;
+            }
+        }
+
+        public NameToken Name
+        {
+            get { return this.name; }
+        }
+
+        public List<Expression> Parameters
+        {
+            get { return parameters; }
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
@@ -373,7 +458,7 @@ namespace Compiler
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.Append(this.func + "(");
+            sb.Append(this.name + "(");
             for (int i = 0; i < this.parameters.Count; i++)
             {
                 string p = this.parameters[i].ToString();
@@ -400,6 +485,9 @@ namespace Compiler
             this.binaryOpToken = binaryOpToken;
             this.operand1 = operand1;
             this.operand2 = operand2;
+
+            this.operand1.ParentExpression = this;
+            this.operand2.ParentExpression = this;
         }
 
         public override void TraverseExpressions(Action<Expression> cb)
