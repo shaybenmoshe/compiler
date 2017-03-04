@@ -392,23 +392,30 @@ namespace Compiler
         }
     }
 
-    public partial class ImmediateExpression : Expression
+    public class ImmediateExpression<T> : Expression where T : Token
     {
-        private Token value;
+        private T value;
 
-        public ImmediateExpression(int position, Token value) : base(position)
+        public ImmediateExpression(int position, T value) : base(position)
         {
             this.value = value;
         }
 
-        public Token Value
+        public T Value
         {
             get { return value; }
         }
-        
+
         public override string ToString()
         {
             return this.value.ToString();
+        }
+    }
+
+    public partial class NameExpression : ImmediateExpression<NameToken>
+    {
+        public NameExpression(int position, NameToken value) : base(position, value)
+        {
         }
     }
 

@@ -42,7 +42,6 @@ namespace Compiler
             }
 
             CallExpression callExpression = expression as CallExpression;
-            FunctionStatement target = null;
 
             for (int i = 0; i < this.functions.Count; i++)
             {
@@ -55,17 +54,6 @@ namespace Compiler
 
             throw new CompilerException("Name `" + callExpression.Name.Value + "` is not a name of a function.",
                 callExpression.Name.Position);
-        }
-    }
-
-    public partial class ImmediateExpression : Expression
-    {
-        private NameDefStatement nameDef;
-        
-        public NameDefStatement NameDef
-        {
-            get { return this.nameDef; }
-            set { this.nameDef = value; }
         }
     }
 
@@ -114,37 +102,41 @@ namespace Compiler
 
         private void LL1RenewLocalOrArgument(Expression expression)
         {
-            if (!(expression is ImmediateExpression))
+            if (!(expression is NameExpression))
             {
                 return;
             }
 
-            ImmediateExpression immediateExpression = expression as ImmediateExpression;
-
-            if (!(immediateExpression.Value is NameToken))
-            {
-                return;
-            }
-
-            NameToken nameToken = immediateExpression.Value as NameToken;
-
+            NameExpression immediateExpression = expression as NameExpression;
+            
             NameDefStatement nameDef = null;
 
             if (nameDef == null)
             {
-                nameDef = Utils.FindNameDefsList(this.locals, nameToken);
+                nameDef = Utils.FindNameDefsList(this.locals, immediateExpression.Value);
             }
             if (nameDef == null)
             {
-                nameDef = Utils.FindNameDefsList(this.arguments, nameToken);
+                nameDef = Utils.FindNameDefsList(this.arguments, immediateExpression.Value);
             }
             if (nameDef == null)
             {
-                throw new CompilerException("Name `" + nameToken.Value + "` is not a name of an argument or a local.",
-                    nameToken.Position);
+                throw new CompilerException("Name `" + immediateExpression.Value.Value + "` is not a name of an argument or a local.",
+                    immediateExpression.Value.Position);
             }
 
             immediateExpression.NameDef = nameDef;
+        }
+    }
+
+    public partial class NameExpression : ImmediateExpression<NameToken>
+    {
+        public NameDefStatement nameDef;
+
+        public NameDefStatement NameDef
+        {
+            get { return this.nameDef; }
+            set { this.nameDef = value; }
         }
     }
 }

@@ -148,9 +148,17 @@ namespace Compiler
                 return this.ParseCall();
             }
 
-            if (this.PeekNextIsImmediate())
+            if (this.tokenStream.PeekNextIsType(Token.Types.String))
             {
-                return new ImmediateExpression(startPosition, this.tokenStream.Next());
+                return new ImmediateExpression<StringToken>(startPosition, this.tokenStream.Next() as StringToken);
+            }
+            if (this.tokenStream.PeekNextIsType(Token.Types.Number))
+            {
+                return new ImmediateExpression<NumberToken>(startPosition, this.tokenStream.Next() as NumberToken);
+            }
+            if (this.tokenStream.PeekNextIsType(Token.Types.Name))
+            {
+                return new NameExpression(startPosition, this.tokenStream.Next() as NameToken);
             }
 
             return null;
