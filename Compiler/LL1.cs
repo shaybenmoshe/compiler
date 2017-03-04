@@ -4,12 +4,12 @@ using System.Text;
 
 namespace Compiler
 {
-    public class LL1Emitter
+    public class LL1
     {
         private AST ast;
         private List<FunctionStatement> functions = new List<FunctionStatement>();
 
-        public LL1Emitter(AST ast)
+        public LL1(AST ast)
         {
             this.ast = ast;
         }

@@ -43,7 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LL1Emitter.cs" />
+    <Compile Include="LL1.cs" />
     <Compile Include="AST.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="TokenStream.cs" />
