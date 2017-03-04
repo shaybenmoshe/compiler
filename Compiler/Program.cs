@@ -16,22 +16,24 @@ function myfunc(x:uint32, y:uint32):uint32 {
     return x + y + z;
 }
 
-var x:uint32 = 100;
-var y:uint32 = 8 + myfunc(1, 2, otherCall()) + 2;
-var z:uint32 = x + y;
-var u:uint32 = 1 + ((2 + 3) + (4 + (5 + 6)) + 7 + 8) + 9;
-var s:string = ""waaa
+function main():void {
+    var x:uint32 = 100;
+    var y:uint32 = 8 + myfunc(1, 2, otherCall()) + 2;
+    var z:uint32 = x + y;
+    var u:uint32 = 1 + ((2 + 3) + (4 + (5 + 6)) + 7 + 8) + 9;
+    var s:string = ""waaa
 
-this is multiline
-"";
+    this is multiline
+    "";
 
-if(x > y) {
-    t = 3000;
+    if(x > y) {
+        t = 3000;
+    }
+    else
+        t = 100;
+
+    y = 20;
 }
-else
-    t = 100;
-y = 20;
-
 ";
 
             try

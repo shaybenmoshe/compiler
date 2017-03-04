@@ -12,7 +12,7 @@ namespace Compiler
     {
     }
 
-    public class ScopeStatement : Statement
+    public class CompoundStatement : Statement
     {
         List<Statement> statements = new List<Statement>();
 

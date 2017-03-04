@@ -13,16 +13,16 @@ namespace Compiler
             this.tokenStream = tokenStream;
         }
 
-        public ScopeStatement ParseAll()
+        public CompoundStatement ParseAll()
         {
-            ScopeStatement scope = new ScopeStatement();
+            CompoundStatement compound = new CompoundStatement();
 
             while (!this.tokenStream.Ended())
             {
-                scope.Add(this.ParseNext());
+                compound.Add(this.ParseNext());
             }
 
-            return scope;
+            return compound;
         }
 
         private Statement ParseNext()
@@ -31,7 +31,7 @@ namespace Compiler
 
             if (this.tokenStream.PeekNextIsPunct(PunctToken.Puncts.LBraces))
             {
-                return this.ParseScope();
+                return this.ParseCompound();
             }
 
             if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.Var))
@@ -68,24 +68,24 @@ namespace Compiler
             throw new CompilerException("Couldn't parse anything.", this.tokenStream.TokenPosition);
         }
 
-        private ScopeStatement ParseScope()
+        private CompoundStatement ParseCompound()
         {
             int startPosition = this.tokenStream.TokenPosition;
 
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LBraces);
 
-            ScopeStatement scope = new ScopeStatement();
+            CompoundStatement compound = new CompoundStatement();
             while (!this.tokenStream.Ended())
             {
                 if (this.tokenStream.PeekNextIsPunct(PunctToken.Puncts.RBraces))
                 {
                     this.tokenStream.Next();
-                    return scope;
+                    return compound;
                 }
-                scope.Add(this.ParseNext());
+                compound.Add(this.ParseNext());
             }
 
-            throw new CompilerException("Expected to find end of scope but ended", startPosition);
+            throw new CompilerException("Expected to find end of compound but ended", startPosition);
         }
 
         private Expression ParseExpression()
