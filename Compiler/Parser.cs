@@ -15,7 +15,7 @@ namespace Compiler
 
         public AST ParseAll()
         {
-            CompoundStatement compound = new CompoundStatement();
+            CompoundStatement compound = new CompoundStatement(0);
 
             while (!this.tokenStream.Ended())
             {
@@ -58,11 +58,12 @@ namespace Compiler
                 return this.ParseFunction();
             }
 
+            int startPosition = this.tokenStream.TokenPosition;
             Expression expression = this.TryParseExpression();
             if (expression != null)
             {
                 this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Semicolon);
-                return new ExpressionStatement(expression);
+                return new ExpressionStatement(startPosition, expression);
             }
 
             throw new CompilerException("Couldn't parse anything.", this.tokenStream.TokenPosition);
@@ -74,7 +75,7 @@ namespace Compiler
 
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LBraces);
 
-            CompoundStatement compound = new CompoundStatement();
+            CompoundStatement compound = new CompoundStatement(startPosition);
             while (!this.tokenStream.Ended())
             {
                 if (this.tokenStream.PeekNextIsPunct(PunctToken.Puncts.RBraces))
@@ -100,6 +101,8 @@ namespace Compiler
 
         private Expression TryParseExpression()
         {
+            int startPosition = this.tokenStream.TokenPosition;
+
             Expression expr1 = this.TryParseAtomicExpression();
 
             if (expr1 == null)
@@ -115,7 +118,7 @@ namespace Compiler
             BinaryOpToken binaryOpToken = this.tokenStream.Next() as BinaryOpToken;
             Expression expr2 = this.ParseExpression();
 
-            return new BinaryOpExpression(binaryOpToken, expr1, expr2);
+            return new BinaryOpExpression(startPosition, binaryOpToken, expr1, expr2);
         }
 
         private Expression ParseAtomicExpression()
@@ -130,12 +133,14 @@ namespace Compiler
 
         private Expression TryParseAtomicExpression()
         {
+            int startPosition = this.tokenStream.TokenPosition;
+
             if (this.tokenStream.PeekNextIsPunct(PunctToken.Puncts.LParenthese))
             {
                 this.tokenStream.Next();
                 Expression expr = this.ParseExpression();
                 this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RParenthese);
-                return new ParentheseExpression(expr);
+                return new ParentheseExpression(startPosition, expr);
             }
 
             if (this.PeekNextIsCall())
@@ -145,7 +150,7 @@ namespace Compiler
 
             if (this.PeekNextIsImmediate())
             {
-                return new ImmediateExpression(this.tokenStream.Next());
+                return new ImmediateExpression(startPosition, this.tokenStream.Next());
             }
 
             return null;
@@ -153,17 +158,21 @@ namespace Compiler
 
         private CallExpression ParseCall()
         {
+            int startPosition = this.tokenStream.TokenPosition;
+
             NameToken func = this.tokenStream.NextName();
 
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LParenthese);
             List<Expression> parameters = this.ParseParantheseCommaList<Expression>(this.tokenStream.TokenPosition, this.ParseExpression);
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RParenthese);
 
-            return new CallExpression(func, parameters);
+            return new CallExpression(startPosition, func, parameters);
         }
 
         private IfElseStatement ParseIfElse()
         {
+            int startPosition = this.tokenStream.TokenPosition;
+
             this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.If);
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LParenthese);
 
@@ -180,7 +189,7 @@ namespace Compiler
                 elseBody = this.ParseNext();
             }
 
-            return new IfElseStatement(cond, body, elseBody);
+            return new IfElseStatement(startPosition, cond, body, elseBody);
         }
 
         private bool PeekNextIsCall()
@@ -200,24 +209,30 @@ namespace Compiler
 
         private VarStatement ParseVar()
         {
+            int startPosition = this.tokenStream.TokenPosition;
+
             this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Var);
 
             NameDefStatement nameDef = this.ParseNameDef();
             this.tokenStream.EnsureNextIsOp(BinaryOpToken.Ops.Ass);
             Expression value = this.ParseExpression();
 
-            return new VarStatement(nameDef, value);
+            return new VarStatement(startPosition, nameDef, value);
         }
 
         private ReturnStatement ParseReturn()
         {
+            int startPosition = this.tokenStream.TokenPosition;
+
             this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Return);
             Expression value = this.ParseExpression();
-            return new ReturnStatement(value);
+            return new ReturnStatement(startPosition, value);
         }
 
         private FunctionStatement ParseFunction()
         {
+            int startPosition = this.tokenStream.TokenPosition;
+
             this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Function);
 
             NameToken name = this.tokenStream.NextName();
@@ -231,16 +246,18 @@ namespace Compiler
 
             Statement body = this.ParseNext();
 
-            return new FunctionStatement(name, retType, arguments, body);
+            return new FunctionStatement(startPosition, name, retType, arguments, body);
         }
 
         private NameDefStatement ParseNameDef()
         {
+            int startPosition = this.tokenStream.TokenPosition;
+
             NameToken name = this.tokenStream.NextName();
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Colon);
             NameToken type = this.tokenStream.NextName();
 
-            return new NameDefStatement(name, type);
+            return new NameDefStatement(startPosition, name, type);
         }
 
         private List<T> ParseParantheseCommaList<T>(int startPosition, Func<T> cb)

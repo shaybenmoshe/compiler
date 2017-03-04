@@ -10,7 +10,7 @@ namespace Compiler
 
         public CompoundStatement TopLevel
         {
-            get { return topLevel; }
+            get { return this.topLevel; }
         }
 
         public AST(CompoundStatement topLevel)
@@ -19,13 +19,40 @@ namespace Compiler
         }
     }
 
-    public class Statement
+    public class PositionThing
     {
+        private int position;
+
+        public int Position
+        {
+            get { return this.position; }
+        }
+
+        public PositionThing(int position)
+        {
+            this.position = position;
+        }
+    }
+
+    public class Statement : PositionThing
+    {
+        public Statement(int position) : base(position)
+        {
+        }
     }
 
     public class CompoundStatement : Statement
     {
         List<Statement> statements = new List<Statement>();
+
+        public List<Statement> Statements
+        {
+            get { return this.statements; }
+        }
+
+        public CompoundStatement(int position) : base(position)
+        {
+        }
 
         public void Add(Statement statement)
         {
@@ -54,7 +81,7 @@ namespace Compiler
         private NameToken name;
         private NameToken type;
 
-        public NameDefStatement(NameToken name, NameToken type)
+        public NameDefStatement(int position, NameToken name, NameToken type) : base(position)
         {
             this.name = name;
             this.type = type;
@@ -71,7 +98,7 @@ namespace Compiler
         private NameDefStatement nameDef;
         private Expression value;
 
-        public VarStatement(NameDefStatement nameDef, Expression value)
+        public VarStatement(int position, NameDefStatement nameDef, Expression value) : base(position)
         {
             this.nameDef = nameDef;
             this.value = value;
@@ -87,7 +114,7 @@ namespace Compiler
     {
         private Expression value;
 
-        public ReturnStatement(Expression value)
+        public ReturnStatement(int position, Expression value) : base(position)
         {
             this.value = value;
         }
@@ -104,7 +131,7 @@ namespace Compiler
         private Statement body;
         private Statement elseBody;
 
-        public IfElseStatement(Expression cond, Statement body, Statement elseBody)
+        public IfElseStatement(int position, Expression cond, Statement body, Statement elseBody) : base(position)
         {
             this.cond = cond;
             this.body = body;
@@ -129,7 +156,7 @@ namespace Compiler
         private List<NameDefStatement> arguments;
         private Statement body;
 
-        public FunctionStatement(NameToken name, NameToken retType, List<NameDefStatement> arguments, Statement body)
+        public FunctionStatement(int position, NameToken name, NameToken retType, List<NameDefStatement> arguments, Statement body) : base(position)
         {
             this.name = name;
             this.retType = retType;
@@ -162,7 +189,7 @@ namespace Compiler
     {
         private Expression expression;
 
-        public ExpressionStatement(Expression expression)
+        public ExpressionStatement(int position, Expression expression) : base(position)
         {
             this.expression = expression;
         }
@@ -173,15 +200,18 @@ namespace Compiler
         }
     }
 
-    public class Expression
+    public class Expression : PositionThing
     {
+        public Expression(int position) : base(position)
+        {
+        }
     }
 
     public class ParentheseExpression : Expression
     {
         private Expression value;
 
-        public ParentheseExpression(Expression value)
+        public ParentheseExpression(int position, Expression value) : base(position)
         {
             this.value = value;
         }
@@ -196,7 +226,7 @@ namespace Compiler
     {
         private Token value;
 
-        public ImmediateExpression(Token value)
+        public ImmediateExpression(int position, Token value) : base(position)
         {
             this.value = value;
         }
@@ -212,7 +242,7 @@ namespace Compiler
         private NameToken func;
         private List<Expression> parameters;
 
-        public CallExpression(NameToken func, List<Expression> parameters)
+        public CallExpression(int position, NameToken func, List<Expression> parameters) : base(position)
         {
             this.func = func;
             this.parameters = parameters;
@@ -244,7 +274,7 @@ namespace Compiler
         private Expression operand1;
         private Expression operand2;
 
-        public BinaryOpExpression(BinaryOpToken binaryOpToken, Expression operand1, Expression operand2)
+        public BinaryOpExpression(int position, BinaryOpToken binaryOpToken, Expression operand1, Expression operand2) : base(position)
         {
             this.binaryOpToken = binaryOpToken;
             this.operand1 = operand1;
