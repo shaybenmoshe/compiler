@@ -52,9 +52,9 @@ function main():void {
                 TokenStream tokenStream = new TokenStream(tokens, input.Length);
 
                 Parser parser = new Parser(tokenStream);
-                Statement statement = parser.ParseAll();
+                AST ast = parser.ParseAll();
 
-                Console.WriteLine(statement.ToString());
+                Console.WriteLine(ast.TopLevel.ToString());
 
                 Console.WriteLine("Done");
             }

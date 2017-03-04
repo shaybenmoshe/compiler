@@ -13,7 +13,7 @@ namespace Compiler
             this.tokenStream = tokenStream;
         }
 
-        public CompoundStatement ParseAll()
+        public AST ParseAll()
         {
             CompoundStatement compound = new CompoundStatement();
 
@@ -22,7 +22,7 @@ namespace Compiler
                 compound.Add(this.ParseNext());
             }
 
-            return compound;
+            return new AST(compound);
         }
 
         private Statement ParseNext()

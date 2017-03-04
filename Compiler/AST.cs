@@ -6,6 +6,17 @@ namespace Compiler
 {
     public class AST
     {
+        CompoundStatement topLevel;
+
+        public CompoundStatement TopLevel
+        {
+            get { return topLevel; }
+        }
+
+        public AST(CompoundStatement topLevel)
+        {
+            this.topLevel = topLevel;
+        }
     }
 
     public class Statement
