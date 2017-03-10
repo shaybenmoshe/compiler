@@ -65,18 +65,18 @@ namespace Compiler
                 }
                 else if (op is AASM.GetLocal)
                 {
-                    this.opcodes.Add(new x86.MovEaxDerefEbp(-(AASM.AASM.AddressSize + (op as AASM.GetLocal).Offset)));
+                    this.opcodes.Add(new x86.MovEaxDerefEbp(-((op as AASM.GetLocal).Offset)));
                     this.opcodes.Add(new x86.PushEax());
                 }
                 else if (op is AASM.SetLocal)
                 {
                     this.opcodes.Add(new x86.PopEax());
                     this.opcodes.Add(new x86.PushEax()); // We still want it on the stack.
-                    this.opcodes.Add(new x86.MovDerefEbpEax(-(AASM.AASM.AddressSize + (op as AASM.SetLocal).Offset)));
+                    this.opcodes.Add(new x86.MovDerefEbpEax(-((op as AASM.SetLocal).Offset)));
                 }
                 else if (op is AASM.GetLocalStruct)
                 {
-                    this.opcodes.Add(new x86.LeaEaxDerefEbp(-(AASM.AASM.AddressSize + (op as AASM.GetLocalStruct).Offset)));
+                    this.opcodes.Add(new x86.LeaEaxDerefEbp(-((op as AASM.GetLocalStruct).Offset)));
                     this.opcodes.Add(new x86.PushEax());
                 }
                 else if (op is AASM.GetArgument)

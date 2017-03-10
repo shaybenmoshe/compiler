@@ -21,15 +21,15 @@ namespace Compiler
 
         public void LLAASMStackOffsets()
         {
-            this.llAASMSize = this.llLocals.Count * AASM.AASM.AddressSize;
-
             int offset = 0;
             for (int i = 0; i < this.llLocals.Count; i++)
             {
                 this.llLocals[i].DefPosition = NameDefStatement.DefPositionTypes.Local;
+                offset += (int)this.llLocals[i].LLAASMType.Size; // This is special to x86, as the stack is the other way around. I think this is correct :(.
                 this.llLocals[i].LLAASMOffset = offset;
-                offset += (int)this.llLocals[i].LLAASMType.Size;
             }
+
+            this.llAASMSize = offset;
 
             offset = 0;
             for (int i = 0; i < this.arguments.Count; i++)

@@ -24,7 +24,9 @@ namespace Compiler
             for (int i = 0; i < this.structStatement.Members.Count; i++)
             {
                 this.structStatement.Members[i].LLAASMStructOffset = offset;
-                offset += this.structStatement.Members[i].LLAASMType.Size;
+                // @todo: for now, everything is either a uint32 or a pointer to another struct.
+                //offset += this.structStatement.Members[i].LLAASMType.Size;
+                offset += AASM.AASM.AddressSize;
             }
 
             this.size = offset;

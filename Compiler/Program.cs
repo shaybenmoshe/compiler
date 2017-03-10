@@ -68,7 +68,7 @@ function fact(x:uint32):uint32 {
     return 1;
 }
 ";*/
-            string input = @"
+            /*string input = @"
 struct FibPair {
     x:uint32,
     y:uint32,
@@ -93,6 +93,49 @@ function fibPairStep(a:FibPair):uint32 {
     t = (a.x) + (a.y);
     (a.x) = (a.y);
     (a.y) = t;
+    return 0;
+}
+";*/
+            string input = @"
+struct A {
+    x:uint32,
+    y:uint32,
+}
+
+struct B {
+    a1:A,
+    z:uint32,
+    a2:A,
+}
+
+function main():uint32 {
+    var l1:A;
+    var l2:A;
+    var b:B;
+    int3;
+
+    (l1.x) = 4294967295;
+    (l1.y) = 4008636142;
+    (l2.x) = 3722304989;
+    (l2.y) = 3435973836;
+
+    int3;
+    (b.a1) = l1;
+    (b.a2) = l2;
+    int3;
+    ((b.a1).x) = 1;
+    ((b.a1).y) = 2;
+    (b.z) = 3;
+    ((b.a2).x) = 4;
+    ((b.a2).y) = 5;
+    int3;
+    ((b.a1).x) = 1;
+    ((b.a1).y) = 2;
+    (b.z) = 3;
+    ((b.a2).x) = 4;
+    ((b.a2).y) = 5;
+    int3;
+
     return 0;
 }
 ";
