@@ -34,18 +34,18 @@ function main():uint32 {
 }
 ";*/
             string input = @"
-function sum(x:uint32):uint32 {
-    if (x > 0) {
-        return x + sum(x + 4294967295);
-    }
+function main():uint32 {
+    var x:uint32 = 7;
+    var y:uint32 = fib(x);
+
     return 0;
 }
 
-function main():uint32 {
-    var x:uint32 = 3;
-    var y:uint32 = sum(x);
-
-    return 0;
+function fib(x:uint32):uint32 {
+    if (x > 1) {
+        return fib(x + 4294967295) + fib(x + 4294967294);
+    }
+    return x;
 }
 ";
 

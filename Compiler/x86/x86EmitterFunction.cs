@@ -45,6 +45,7 @@ namespace Compiler
         public void CreateOpcodes()
         {
             this.opcodes.Add(new x86.Int3());
+
             this.opcodes.Add(new x86.PushEbp());
             this.opcodes.Add(new x86.MovEbpEsp());
 
