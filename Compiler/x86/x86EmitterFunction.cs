@@ -88,15 +88,22 @@ namespace Compiler
                 }
                 else if (op is AASM.Add)
                 {
-                    this.opcodes.Add(new x86.PopEax());
                     this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
                     this.opcodes.Add(new x86.AddEaxEcx());
+                    this.opcodes.Add(new x86.PushEax());
+                }
+                else if (op is AASM.Sub)
+                {
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.SubEaxEcx());
                     this.opcodes.Add(new x86.PushEax());
                 }
                 else if (op is AASM.Mul)
                 {
-                    this.opcodes.Add(new x86.PopEax());
                     this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
                     this.opcodes.Add(new x86.MulEaxEcx());
                     this.opcodes.Add(new x86.PushEax());
                 }
