@@ -62,9 +62,10 @@ namespace Compiler
         public override AASM.AASM LLAASMEmit()
         {
             AASM.AASM aasm = new AASM.AASM();
-            aasm.Add(this.value.LLAASMEmit());
+            // Set default value.
+            /*aasm.Add(this.value.LLAASMEmit());
             aasm.Add(new AASM.SetLocal(this.nameDef.LLAASMOffset));
-            aasm.Add(new AASM.Pop());
+            aasm.Add(new AASM.Pop());*/
             return aasm;
         }
     }
@@ -138,6 +139,12 @@ namespace Compiler
             // @todo
             throw new CompilerException("Not implemented!", this.Position);
         }
+
+        public virtual AASM.AASM LLAASMEmitWrite()
+        {
+            // @todo
+            throw new CompilerException("Write is invalid for this Expression!", this.Position);
+        }
     }
 
     public partial class ParentheseExpression : Expression
@@ -145,6 +152,11 @@ namespace Compiler
         public override AASM.AASM LLAASMEmit()
         {
             return this.value.LLAASMEmit();
+        }
+
+        public override AASM.AASM LLAASMEmitWrite()
+        {
+            return this.value.LLAASMEmitWrite();
         }
     }
 
@@ -168,7 +180,42 @@ namespace Compiler
         public override AASM.AASM LLAASMEmit()
         {
             AASM.AASM aasm = new AASM.AASM();
-            aasm.Add(new AASM.GetLocal(this.llNameDef.LLAASMOffset));
+            if (this.llNameDef.DefPosition == NameDefStatement.DefPositionTypes.Local)
+            {
+                if (this.LLAASMType is AASMStructType)
+                {
+                    aasm.Add(new AASM.GetLocalStruct(this.llNameDef.LLAASMOffset));
+                }
+                else
+                {
+                    aasm.Add(new AASM.GetLocal(this.llNameDef.LLAASMOffset));
+                }
+            }
+            else if (this.llNameDef.DefPosition == NameDefStatement.DefPositionTypes.Argument)
+            {
+                aasm.Add(new AASM.GetArgument(this.llNameDef.LLAASMOffset));
+            }
+            return aasm;
+        }
+
+        public override AASM.AASM LLAASMEmitWrite()
+        {
+            AASM.AASM aasm = new AASM.AASM();
+            if (this.llNameDef.DefPosition == NameDefStatement.DefPositionTypes.Local)
+            {
+                if (this.LLAASMType is AASMStructType)
+                {
+                    throw new CompilerException("Can't set local struct", this.Position);
+                }
+                else
+                {
+                    aasm.Add(new AASM.SetLocal(this.llNameDef.LLAASMOffset));
+                }
+            }
+            else if (this.llNameDef.DefPosition == NameDefStatement.DefPositionTypes.Argument)
+            {
+                aasm.Add(new AASM.SetArgument(this.llNameDef.LLAASMOffset));
+            }
             return aasm;
         }
     }
@@ -199,14 +246,7 @@ namespace Compiler
             if (this.binaryOpToken.Value == BinaryOpToken.Ops.Ass)
             {
                 aasm.Add(this.operand2.LLAASMEmit());
-
-                if (!(this.operand1 is NameExpression))
-                {
-                    throw new CompilerException("Left side of assignment must be a local or argument.", this.Position);
-                }
-                NameExpression left = this.operand1 as NameExpression;
-                aasm.Add(new AASM.SetLocal(left.LLNameDef.LLAASMOffset));
-
+                aasm.Add(this.operand1.LLAASMEmitWrite());
                 return aasm;
             }
 
@@ -218,6 +258,9 @@ namespace Compiler
                 case BinaryOpToken.Ops.Add:
                     aasm.Add(new AASM.Add());
                     break;
+                case BinaryOpToken.Ops.Sub:
+                    aasm.Add(new AASM.Sub());
+                    break;
                 case BinaryOpToken.Ops.Mul:
                     aasm.Add(new AASM.Mul());
                     break;
@@ -227,6 +270,29 @@ namespace Compiler
                 default:
                     throw new CompilerException("Don't know how to AASM binary op " + this.binaryOpToken.Value + ".", this.Position);
             }
+
+            return aasm;
+        }
+    }
+
+    public partial class MemberAccessExpression : Expression
+    {
+        public override AASM.AASM LLAASMEmit()
+        {
+            AASM.AASM aasm = new AASM.AASM();
+
+            aasm.Add(this.operand.LLAASMEmit());
+            aasm.Add(new AASM.MemberRead(this.operand.LLAASMType as AASMStructType, this.memberIndex));
+
+            return aasm;
+        }
+
+        public override AASM.AASM LLAASMEmitWrite()
+        {
+            AASM.AASM aasm = new AASM.AASM();
+
+            aasm.Add(this.operand.LLAASMEmit());
+            aasm.Add(new AASM.MemberWrite(this.operand.LLAASMType as AASMStructType, this.memberIndex));
 
             return aasm;
         }

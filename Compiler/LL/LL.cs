@@ -15,11 +15,12 @@ namespace Compiler
 
         public void Emit()
         {
-            this.FunctionResolver();
+            this.LLTopLevelResolver();
             this.LLLocalsResolver();
             this.LLNamesResolver();
+            
+            this.LLStructsResolver();
 
-            this.LLAASMTypeResolver();
             this.LLAASMStackOffsets();
             this.LLAASMEmit();
         }

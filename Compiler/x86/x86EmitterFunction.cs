@@ -65,14 +65,30 @@ namespace Compiler
                 }
                 else if (op is AASM.GetLocal)
                 {
-                    this.opcodes.Add(new x86.MovEaxDerefEbp(-(op as AASM.GetLocal).Offset));
+                    this.opcodes.Add(new x86.MovEaxDerefEbp(-(AASM.AASM.AddressSize + (op as AASM.GetLocal).Offset)));
                     this.opcodes.Add(new x86.PushEax());
                 }
                 else if (op is AASM.SetLocal)
                 {
                     this.opcodes.Add(new x86.PopEax());
                     this.opcodes.Add(new x86.PushEax()); // We still want it on the stack.
-                    this.opcodes.Add(new x86.SetDerefEbpEax(-(op as AASM.SetLocal).Offset));
+                    this.opcodes.Add(new x86.MovDerefEbpEax(-(AASM.AASM.AddressSize + (op as AASM.SetLocal).Offset)));
+                }
+                else if (op is AASM.GetLocalStruct)
+                {
+                    this.opcodes.Add(new x86.LeaEaxDerefEbp(-(AASM.AASM.AddressSize + (op as AASM.GetLocalStruct).Offset)));
+                    this.opcodes.Add(new x86.PushEax());
+                }
+                else if (op is AASM.GetArgument)
+                {
+                    this.opcodes.Add(new x86.MovEaxDerefEbp(2 * AASM.AASM.AddressSize + (op as AASM.GetArgument).Offset));
+                    this.opcodes.Add(new x86.PushEax());
+                }
+                else if (op is AASM.SetArgument)
+                {
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PushEax()); // We still want it on the stack.
+                    this.opcodes.Add(new x86.MovDerefEbpEax(2 * AASM.AASM.AddressSize + (op as AASM.SetArgument).Offset));
                 }
                 else if (op is AASM.Push)
                 {
@@ -134,10 +150,51 @@ namespace Compiler
                     this.opcodes.Add(new x86.CmpEax0());
                     this.opcodes.Add(new x86.Je(this.labelsDictionary[(op as AASM.JmpFalse).Target]));
                 }
+                else if (op is AASM.MemberRead)
+                {
+                    AASM.MemberRead memberRead = op as AASM.MemberRead;
+                    uint offset = memberRead.StructType.StructStatement.Members[memberRead.Member].LLAASMStructOffset;
+
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.MovEaxDerefEax(offset));
+                    this.opcodes.Add(new x86.PushEax());
+                }
+                else if (op is AASM.MemberWrite)
+                {
+                    AASM.MemberWrite memberWrite = op as AASM.MemberWrite;
+                    uint offset = memberWrite.StructType.StructStatement.Members[memberWrite.Member].LLAASMStructOffset;
+
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.MovDerefEaxEcx(offset));
+                    this.opcodes.Add(new x86.PushEax());
+                }
                 else
                 {
                     throw new Exception("Don't know how to emit opcode " + op.ToString());
                 }
+            }
+        }
+
+        public void Optimize()
+        {
+            this.OptimizePushEaxPopEax();
+        }
+
+        public void OptimizePushEaxPopEax()
+        {
+            for (int i = 0; i < this.opcodes.Count - 1; i++)
+            {
+                if (!(this.opcodes[i] is x86.PushEax))
+                {
+                    continue;
+                }
+                if (!(this.opcodes[i + 1] is x86.PopEax))
+                {
+                    continue;
+                }
+                this.opcodes.RemoveRange(i, 2);
+                i -= 2;
             }
         }
 

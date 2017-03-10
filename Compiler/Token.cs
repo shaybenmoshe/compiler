@@ -92,11 +92,13 @@ namespace Compiler
             Ass,
             Eq,
             Add,
+            Sub,
             Mul,
             Gt,
             Gte,
             Lt,
             Lte,
+            Dot,
         }
 
         private Ops value;
@@ -185,6 +187,7 @@ namespace Compiler
         public enum Keywords
         {
             Var,
+            Struct,
             If,
             Else,
             Function,

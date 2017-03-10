@@ -47,8 +47,8 @@
     <Compile Include="LL\LL.cs" />
     <Compile Include="LL\LLASM\LLAASMStackOffsets.cs" />
     <Compile Include="LL\LLASM\LLAASMEmitter.cs" />
-    <Compile Include="LL\LLASM\LLAASMTypeResolver.cs" />
-    <Compile Include="LL\LLFunctionResolver.cs" />
+    <Compile Include="LL\LLStructsResolver.cs" />
+    <Compile Include="LL\LLTopLevelResolver.cs" />
     <Compile Include="LL\LLLocalsResolver.cs" />
     <Compile Include="AASMTypes.cs" />
     <Compile Include="LL\LLNamesResolver.cs" />

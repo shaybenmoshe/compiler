@@ -4,27 +4,49 @@ using System.Text;
 
 namespace Compiler
 {
-    public class AASMType
+    public interface IAASMType
     {
-        private int size;
+        uint Size { get; }
+    }
+
+    public class AASMNativeType : IAASMType
+    {
+        private uint size;
         private string name;
 
-        public AASMType(int size, string name)
+        public AASMNativeType(uint size, string name)
         {
             this.size = size;
             this.name = name;
         }
 
-        public int Size
+        public uint Size
         {
             get { return this.size; }
         }
 
-        public static AASMType Resolve(string name)
+        public static AASMNativeType AASMUint32 = new AASMNativeType(4, "uint32");
+    }
+
+    public partial class AASMStructType : IAASMType
+    {
+        private uint size;
+        private StructStatement structStatement;
+
+        public AASMStructType(StructStatement structStatement)
         {
-            return AASMUint32;
+            this.structStatement = structStatement;
         }
 
-        public static AASMType AASMUint32 = new AASMType(4, "uint32");
+        // @todo
+        public uint Size
+        {
+            get { return this.size; }
+        }
+
+        public StructStatement StructStatement
+        {
+            get { return this.structStatement; }
+        }
     }
 }

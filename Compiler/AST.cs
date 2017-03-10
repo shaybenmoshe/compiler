@@ -139,31 +139,23 @@ namespace Compiler
     public partial class VarStatement : Statement
     {
         private NameDefStatement nameDef;
-        private Expression value;
 
         public NameDefStatement NameDef
         {
             get { return this.nameDef; }
         }
 
-        public VarStatement(int position, NameDefStatement nameDef, Expression value) : base(position)
+        public VarStatement(int position, NameDefStatement nameDef) : base(position)
         {
             this.nameDef = nameDef;
-            this.value = value;
-        }
-
-        public override void TraverseExpressions(Action<Expression> cb)
-        {
-            base.TraverseExpressions(cb);
-            this.value.TraverseExpressions(cb);
         }
 
         public override string ToString()
         {
-            return "var " + this.nameDef.ToString() + " = " + this.value.ToString() + ";";
+            return "var " + this.nameDef.ToString() + ";";
         }
     }
-
+    
     public partial class ReturnStatement : Statement
     {
         private Expression value;
@@ -239,6 +231,65 @@ namespace Compiler
                 s += "\r\nelse " + this.elseBody.ToString();
             }
             return s;
+        }
+    }
+
+    public partial class StructStatement : Statement
+    {
+        private NameToken name;
+        private List<NameDefStatement> members;
+
+        public NameToken Name
+        {
+            get { return this.name; }
+        }
+
+        public List<NameDefStatement> Members
+        {
+            get { return this.members; }
+        }
+
+        public StructStatement(int position, NameToken name, List<NameDefStatement> members) : base(position)
+        {
+            this.name = name;
+            this.members = members;
+        }
+
+        public override void TraverseStatements(Action<Statement> cb)
+        {
+            base.TraverseStatements(cb);
+            for (int i = 0; i < this.members.Count; i++)
+            {
+                this.members[i].TraverseStatements(cb);
+            }
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            for (int i = 0; i < this.members.Count; i++)
+            {
+                this.members[i].TraverseExpressions(cb);
+            }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("struct " + this.name.ToString() + "{");
+            for (int i = 0; i < this.members.Count; i++)
+            {
+                string p = this.members[i].ToString();
+                if (i > 0)
+                {
+                    sb.Append(";");
+                }
+                sb.Append(p);
+            }
+            sb.Append("}");
+
+            return sb.ToString();
         }
     }
 
@@ -472,6 +523,29 @@ namespace Compiler
         public override string ToString()
         {
             return this.operand1.ToString() + this.binaryOpToken.ToString() + this.operand2.ToString();
+        }
+    }
+
+    public partial class MemberAccessExpression : Expression
+    {
+        private Expression operand;
+        private NameToken member;
+
+        public MemberAccessExpression(int position, Expression operand, NameToken member) : base(position)
+        {
+            this.operand = operand;
+            this.member = member;
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            this.operand.TraverseExpressions(cb);
+            base.TraverseExpressions(cb);
+        }
+
+        public override string ToString()
+        {
+            return this.operand.ToString() + "." + this.member.ToString();
         }
     }
 }

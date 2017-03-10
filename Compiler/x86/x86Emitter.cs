@@ -38,6 +38,7 @@ namespace Compiler
 
                 functionEmitter.ResolveLabels();
                 functionEmitter.CreateOpcodes();
+                functionEmitter.Optimize();
                 functionEmitter.ResolveOffsesInX86();
             }
 

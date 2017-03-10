@@ -205,11 +205,34 @@ namespace Compiler
             }
         }
 
-        public class SetDerefEbpEax : Opcode
+        public class LeaEaxDerefEbp : Opcode
         {
             private int offset;
 
-            public SetDerefEbpEax(int offset)
+            public LeaEaxDerefEbp(int offset)
+            {
+                this.offset = offset;
+            }
+
+            public int Offset
+            {
+                get { return this.offset; }
+            }
+
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0x458d, 2); // lea eax, dword ptr [ebp+?]
+                x86.Add((byte)this.offset);
+                return x86;
+            }
+        }
+
+        public class MovDerefEbpEax : Opcode
+        {
+            private int offset;
+
+            public MovDerefEbpEax(int offset)
             {
                 this.offset = offset;
             }
@@ -266,6 +289,16 @@ namespace Compiler
             }
         }
 
+        public class SubEaxEcx : Opcode
+        {
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0xc829, 2); // sub eax, ecx
+                return x86;
+            }
+        }
+
         public class MulEaxEcx : Opcode
         {
             public override List<byte> Emit()
@@ -303,6 +336,42 @@ namespace Compiler
                 List<byte> x86 = new List<byte>();
                 x86.Add(0x3d); // cmp eax, ?
                 Utils.Write(x86, 0, 4);
+                return x86;
+            }
+        }
+
+        public class MovEaxDerefEax : Opcode
+        {
+            private uint offset;
+
+            public MovEaxDerefEax(uint offset)
+            {
+                this.offset = offset;
+            }
+
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0x808b, 2); // mov eax, [eax+???]
+                Utils.Write(x86, offset, 4);
+                return x86;
+            }
+        }
+
+        public class MovDerefEaxEcx : Opcode
+        {
+            private uint offset;
+
+            public MovDerefEaxEcx(uint offset)
+            {
+                this.offset = offset;
+            }
+
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0x8889, 2); // mov [eax+???], ecx
+                Utils.Write(x86, offset, 4);
                 return x86;
             }
         }

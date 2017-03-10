@@ -52,7 +52,7 @@ function fib(x:uint32):uint32 {
     return x;
 }
 ";*/
-            string input = @"
+            /*string input = @"
 function main():uint32 {
     var x:uint32 = 7;
     var y:uint32 = fact(x);
@@ -63,9 +63,37 @@ function main():uint32 {
 
 function fact(x:uint32):uint32 {
     if (x > 0) {
-        return x * fact(x + 4294967295);
+        return x * fact(x - 1);
     }
     return 1;
+}
+";*/
+            string input = @"
+struct FibPair {
+    x:uint32,
+    y:uint32,
+}
+
+function main():uint32 {
+    var a:FibPair;
+    //int3;
+    (a.x) = 0;
+    (a.y) = 1;
+    fibPairStep(a);
+    fibPairStep(a);
+    fibPairStep(a);
+    fibPairStep(a);
+    fibPairStep(a);
+
+    return 0;
+}
+
+function fibPairStep(a:FibPair):uint32 {
+    var t:uint32;
+    t = (a.x) + (a.y);
+    (a.x) = (a.y);
+    (a.y) = t;
+    return 0;
 }
 ";
 
@@ -130,9 +158,9 @@ function fact(x:uint32):uint32 {
                 Console.Write("<<<!ERROR!>>>");
                 Console.ResetColor();
                 Console.Write(input.Substring(e.Position));
-            }
 
-            Console.ReadKey();
+                Console.ReadKey();
+            }
         }
     }
 }

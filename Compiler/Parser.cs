@@ -41,6 +41,12 @@ namespace Compiler
                 return statement;
             }
 
+            if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.Struct))
+            {
+                statement = this.ParseStruct();
+                return statement;
+            }
+
             if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.Return))
             {
                 statement = this.ParseReturn();
@@ -123,8 +129,14 @@ namespace Compiler
             }
 
             BinaryOpToken binaryOpToken = this.tokenStream.Next() as BinaryOpToken;
-            Expression expr2 = this.ParseExpression();
 
+            if (binaryOpToken.Value == BinaryOpToken.Ops.Dot)
+            {
+                NameToken member = this.tokenStream.NextName();
+                return new MemberAccessExpression(startPosition, expr1, member);
+            }
+
+            Expression expr2 = this.ParseExpression();
             return new BinaryOpExpression(startPosition, binaryOpToken, expr1, expr2);
         }
 
@@ -179,7 +191,7 @@ namespace Compiler
             NameToken name = this.tokenStream.NextName();
 
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LParenthese);
-            List<Expression> parameters = this.ParseParantheseCommaList<Expression>(this.tokenStream.TokenPosition, this.ParseExpression);
+            List<Expression> parameters = this.ParseParantheseCommaList<Expression>(this.tokenStream.TokenPosition, this.ParseExpression, PunctToken.Puncts.RParenthese);
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RParenthese);
 
             return new CallExpression(startPosition, name, parameters);
@@ -230,10 +242,23 @@ namespace Compiler
             this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Var);
 
             NameDefStatement nameDef = this.ParseNameDef();
-            this.tokenStream.EnsureNextIsOp(BinaryOpToken.Ops.Ass);
-            Expression value = this.ParseExpression();
 
-            return new VarStatement(startPosition, nameDef, value);
+            return new VarStatement(startPosition, nameDef);
+        }
+
+        private StructStatement ParseStruct()
+        {
+            int startPosition = this.tokenStream.TokenPosition;
+
+            this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Struct);
+
+            NameToken name = this.tokenStream.NextName();
+
+            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LBraces);
+            List<NameDefStatement> members = this.ParseParantheseCommaList<NameDefStatement>(this.tokenStream.TokenPosition, this.ParseNameDef, PunctToken.Puncts.RBraces);
+            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RBraces);
+
+            return new StructStatement(startPosition, name, members);
         }
 
         private ReturnStatement ParseReturn()
@@ -262,7 +287,7 @@ namespace Compiler
             NameToken name = this.tokenStream.NextName();
             
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LParenthese);
-            List<NameDefStatement> arguments = this.ParseParantheseCommaList<NameDefStatement>(this.tokenStream.TokenPosition, this.ParseNameDef);
+            List<NameDefStatement> arguments = this.ParseParantheseCommaList<NameDefStatement>(this.tokenStream.TokenPosition, this.ParseNameDef, PunctToken.Puncts.RParenthese);
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RParenthese);
 
             this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Colon);
@@ -284,13 +309,13 @@ namespace Compiler
             return new NameDefStatement(startPosition, name, type);
         }
 
-        private List<T> ParseParantheseCommaList<T>(int startPosition, Func<T> cb)
+        private List<T> ParseParantheseCommaList<T>(int startPosition, Func<T> cb, PunctToken.Puncts endingPunct)
         {
             List<T> list = new List<T>();
             bool first = true;
             while (!this.tokenStream.Ended())
             {
-                if (this.tokenStream.PeekNextIsPunct(PunctToken.Puncts.RParenthese))
+                if (this.tokenStream.PeekNextIsPunct(endingPunct))
                 {
                     return list;
                 }
@@ -300,6 +325,12 @@ namespace Compiler
                     this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Comma);
                 }
                 first = false;
+
+                // We allow extra comma.
+                if (this.tokenStream.PeekNextIsPunct(endingPunct))
+                {
+                    return list;
+                }
 
                 list.Add(cb());
             }

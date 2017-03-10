@@ -23,30 +23,45 @@ namespace Compiler
         {
             this.llAASMSize = this.llLocals.Count * AASM.AASM.AddressSize;
 
-            int localOffset = AASM.AASM.AddressSize;
+            int offset = 0;
             for (int i = 0; i < this.llLocals.Count; i++)
             {
-                this.llLocals[i].LLAASMOffset = localOffset;
-                localOffset += this.llLocals[i].LLAASMType.Size;
+                this.llLocals[i].DefPosition = NameDefStatement.DefPositionTypes.Local;
+                this.llLocals[i].LLAASMOffset = offset;
+                offset += (int)this.llLocals[i].LLAASMType.Size;
             }
 
-            int argumentOffset = - 2 * AASM.AASM.AddressSize;
+            offset = 0;
             for (int i = 0; i < this.arguments.Count; i++)
             {
-                this.arguments[i].LLAASMOffset = argumentOffset;
-                argumentOffset -= this.arguments[i].LLAASMType.Size;
+                this.arguments[i].DefPosition = NameDefStatement.DefPositionTypes.Argument;
+                this.arguments[i].LLAASMOffset = offset;
+                offset += (int)this.arguments[i].LLAASMType.Size;
             }
         }
     }
 
     public partial class NameDefStatement : Statement
     {
+        public enum DefPositionTypes
+        {
+            Local,
+            Argument,
+        }
+
+        private DefPositionTypes defPosition;
         private int llAASMOffset;
 
         public int LLAASMOffset
         {
             get { return this.llAASMOffset; }
             set { this.llAASMOffset = value; }
+        }
+
+        public DefPositionTypes DefPosition
+        {
+            get { return this.defPosition; }
+            set { this.defPosition = value; }
         }
     }
 }

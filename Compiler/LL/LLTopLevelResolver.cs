@@ -6,27 +6,39 @@ namespace Compiler
 {
     public partial class LL
     {
+        private List<AASMStructType> structs = new List<AASMStructType>();
         private List<FunctionStatement> functions = new List<FunctionStatement>();
+
+        public List<AASMStructType> Structs
+        {
+            get { return this.structs; }
+        }
 
         public List<FunctionStatement> Functions
         {
             get { return this.functions; }
         }
 
-        private void FunctionResolver()
+        private void LLTopLevelResolver()
         {
             CompoundStatement topLevel = this.ast.TopLevel;
 
             for (var i = 0; i < topLevel.Statements.Count; i++)
             {
                 Statement statement = topLevel.Statements[i];
-                if (!(statement is FunctionStatement))
-                {
-                    throw new CompilerException("Toplevel must contain only function definitions.", statement.Position);
-                }
 
-                FunctionStatement function = statement as FunctionStatement;
-                this.functions.Add(function);
+                if (statement is FunctionStatement)
+                {
+                    this.functions.Add(statement as FunctionStatement);
+                }
+                else if (statement is StructStatement)
+                {
+                    this.structs.Add(new AASMStructType(statement as StructStatement));
+                }
+                else
+                {
+                    throw new CompilerException("Toplevel must contain only function and struct definitions.", statement.Position);
+                }
             }
 
             topLevel.TraverseExpressions(this.RenewCalls);

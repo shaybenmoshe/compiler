@@ -62,11 +62,11 @@ namespace Compiler
             }
         }
 
-        public class GetLocal : Opcode
+        public class VarAccess : Opcode
         {
             private int offset;
 
-            public GetLocal(int offset)
+            public VarAccess(int offset)
             {
                 this.offset = offset;
             }
@@ -77,18 +77,38 @@ namespace Compiler
             }
         }
 
-        public class SetLocal : Opcode
+        public class GetLocal : VarAccess
         {
-            private int offset;
-
-            public SetLocal(int offset)
+            public GetLocal(int offset) : base(offset)
             {
-                this.offset = offset;
             }
+        }
 
-            public int Offset
+        public class SetLocal : VarAccess
+        {
+            public SetLocal(int offset) : base(offset)
             {
-                get { return this.offset; }
+            }
+        }
+
+        public class GetLocalStruct : VarAccess
+        {
+            public GetLocalStruct(int offset) : base(offset)
+            {
+            }
+        }
+        
+        public class GetArgument : VarAccess
+        {
+            public GetArgument(int offset) : base(offset)
+            {
+            }
+        }
+
+        public class SetArgument : VarAccess
+        {
+            public SetArgument(int offset) : base(offset)
+            {
             }
         }
 
@@ -116,6 +136,10 @@ namespace Compiler
         }
 
         public class Add : Opcode
+        {
+        }
+
+        public class Sub : Opcode
         {
         }
 
@@ -167,6 +191,46 @@ namespace Compiler
 
         public class Label : Opcode
         {
+        }
+
+        public class Deref : Opcode
+        {
+        }
+
+        public class MemberBase : Opcode
+        {
+            private AASMStructType structType;
+            private int member;
+
+            public MemberBase(AASMStructType structType, int member)
+            {
+                this.structType = structType;
+                this.member = member;
+            }
+
+            public AASMStructType StructType
+            {
+                get { return this.structType; }
+            }
+
+            public int Member
+            {
+                get { return this.member; }
+            }
+        }
+
+        public class MemberRead : MemberBase
+        {
+            public MemberRead(AASMStructType structType, int member) : base(structType, member)
+            {
+            }
+        }
+
+        public class MemberWrite : MemberBase
+        {
+            public MemberWrite(AASMStructType structType, int member) : base(structType, member)
+            {
+            }
         }
     }
 }
