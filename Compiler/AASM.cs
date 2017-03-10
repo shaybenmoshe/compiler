@@ -119,6 +119,10 @@ namespace Compiler
         {
         }
 
+        public class Mul : Opcode
+        {
+        }
+
         public class Gt : Opcode
         {
         }

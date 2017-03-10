@@ -69,6 +69,7 @@ namespace Compiler
             if (this.inputStream.NextIs('=')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Ass); }
             if (this.inputStream.NextIs("==")) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Eq); }
             if (this.inputStream.NextIs('+')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Add); }
+            if (this.inputStream.NextIs('*')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Mul); }
             if (this.inputStream.NextIs('>')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Gt); }
             if (this.inputStream.NextIs(">=")) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Gte); }
             if (this.inputStream.NextIs('<')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Lt); }

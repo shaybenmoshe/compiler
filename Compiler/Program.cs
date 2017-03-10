@@ -10,7 +10,7 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            string input = @"
+            /*string input = @"
 function myfunc(x:uint32, y:uint32):uint32 {
     var z:uint32 = 3;
     return x + y + z;
@@ -35,7 +35,7 @@ function main():uint32 {
     int3;
     return u;
 }
-";
+";*/
             /*string input = @"
 function main():uint32 {
     var x:uint32 = 7;
@@ -52,6 +52,22 @@ function fib(x:uint32):uint32 {
     return x;
 }
 ";*/
+            string input = @"
+function main():uint32 {
+    var x:uint32 = 7;
+    var y:uint32 = fact(x);
+    int3;
+
+    return 0;
+}
+
+function fact(x:uint32):uint32 {
+    if (x > 0) {
+        return x * fact(x + 4294967295);
+    }
+    return 1;
+}
+";
 
             try
             {

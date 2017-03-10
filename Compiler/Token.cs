@@ -92,6 +92,7 @@ namespace Compiler
             Ass,
             Eq,
             Add,
+            Mul,
             Gt,
             Gte,
             Lt,

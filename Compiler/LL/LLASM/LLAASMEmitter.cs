@@ -218,6 +218,9 @@ namespace Compiler
                 case BinaryOpToken.Ops.Add:
                     aasm.Add(new AASM.Add());
                     break;
+                case BinaryOpToken.Ops.Mul:
+                    aasm.Add(new AASM.Mul());
+                    break;
                 case BinaryOpToken.Ops.Gt:
                     aasm.Add(new AASM.Gt());
                     break;

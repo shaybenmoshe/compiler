@@ -266,6 +266,16 @@ namespace Compiler
             }
         }
 
+        public class MulEaxEcx : Opcode
+        {
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0xe1f7, 2); // mul eax, ecx
+                return x86;
+            }
+        }
+
         public class MovEbpEsp : Opcode
         {
             public override List<byte> Emit()
