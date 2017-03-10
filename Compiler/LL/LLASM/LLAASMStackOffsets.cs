@@ -21,16 +21,16 @@ namespace Compiler
 
         public void LLAASMStackOffsets()
         {
-            int localOffset = 0;
+            this.llAASMSize = this.llLocals.Count * AASM.AASM.AddressSize;
+
+            int localOffset = AASM.AASM.AddressSize;
             for (int i = 0; i < this.llLocals.Count; i++)
             {
                 this.llLocals[i].LLAASMOffset = localOffset;
                 localOffset += this.llLocals[i].LLAASMType.Size;
             }
 
-            this.llAASMSize = localOffset;
-
-            int argumentOffset = - AASM.AASM.AddressSize;
+            int argumentOffset = - 2 * AASM.AASM.AddressSize;
             for (int i = 0; i < this.arguments.Count; i++)
             {
                 this.arguments[i].LLAASMOffset = argumentOffset;

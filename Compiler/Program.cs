@@ -10,7 +10,7 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            string input = @"
+            /*string input = @"
 function myfunc(x:uint32, y:uint32):uint32 {
     var z:uint32 = 3;
     return x + y + z;
@@ -29,6 +29,21 @@ function main():uint32 {
         u = 100;
 
     y = 20;
+
+    return 0;
+}
+";*/
+            string input = @"
+function sum(x:uint32):uint32 {
+    if (x > 0) {
+        return x + sum(x + 4294967295);
+    }
+    return 0;
+}
+
+function main():uint32 {
+    var x:uint32 = 3;
+    var y:uint32 = sum(x);
 
     return 0;
 }

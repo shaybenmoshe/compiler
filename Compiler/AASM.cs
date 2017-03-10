@@ -107,6 +107,10 @@ namespace Compiler
             }
         }
 
+        public class PushRetVal : Opcode
+        {
+        }
+
         public class Pop : Opcode
         {
         }
@@ -125,32 +129,36 @@ namespace Compiler
 
         public class BaseJmp : Opcode
         {
-            private int offset;
+            private Label target;
 
-            public BaseJmp(int offset)
+            public BaseJmp(Label target)
             {
-                this.offset = offset;
+                this.target = target;
             }
 
-            public int Offset
+            public Label Target
             {
-                get { return this.offset; }
-                set { this.offset = value; }
+                get { return this.target; }
+                set { this.target = value; }
             }
         }
 
         public class Jmp : BaseJmp
         {
-            public Jmp(int offset) : base(offset)
+            public Jmp(Label target) : base(target)
             {
             }
         }
 
         public class JmpFalse : BaseJmp
         {
-            public JmpFalse(int offset) : base(offset)
+            public JmpFalse(Label target) : base(target)
             {
             }
+        }
+
+        public class Label : Opcode
+        {
         }
     }
 }

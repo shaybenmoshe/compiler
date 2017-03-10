@@ -5,129 +5,161 @@ namespace Compiler
 {
     public class x86FunctionEmitter
     {
-        private int stack;
         private AASM.AASM aasm;
-        private List<byte> x86 = new List<byte>();
+        private List<x86.Opcode> opcodes = new List<x86.Opcode>();
+        private Dictionary<AASM.Label, x86.Label> labelsDictionary = new Dictionary<AASM.Label, x86.Label>();
+        private uint x86Size;
+        private uint offsetInX86;
 
         public x86FunctionEmitter(AASM.AASM aasm)
         {
             this.aasm = aasm;
-            this.stack = 0;
+        }
+        
+        public uint X86Size
+        {
+            get { return this.x86Size; }
         }
 
-        public List<byte> X86
+        public uint OffsetInX86
         {
-            get { return this.x86; }
+            get { return this.offsetInX86; }
+            set { this.offsetInX86 = value; }
         }
 
-        private void EmitPopEax()
+        public void ResolveLabels()
         {
-            this.stack -= 4;
-            this.x86.Add(0x58);
+            for (int i = 0; i < this.aasm.Opcodes.Count; i++)
+            {
+                if (!(this.aasm.Opcodes[i] is AASM.Label))
+                {
+                    continue;
+                }
+
+                AASM.Label op = this.aasm.Opcodes[i] as AASM.Label;
+
+                this.labelsDictionary[op] = new x86.Label();
+            }
         }
 
-        private void EmitPopEcx()
+        public void CreateOpcodes()
         {
-            this.stack -= 4;
-            this.x86.Add(0x59);
-        }
-
-        private void EmitPushEax()
-        {
-            this.stack += 4;
-            this.x86.Add(0x50);
-        }
-
-        public void Emit()
-        {
-            int offset;
-
-            // @todo add push ebp; mov ebp, esp
+            this.opcodes.Add(new x86.Int3());
+            this.opcodes.Add(new x86.PushEbp());
+            this.opcodes.Add(new x86.MovEbpEsp());
 
             for (int i = 0; i < this.aasm.Opcodes.Count; i++)
             {
                 AASM.Opcode op = this.aasm.Opcodes[i];
 
-                if (op is AASM.Call)
+                if (op is AASM.Label)
                 {
-                    this.x86.Add(0xe8);
-                    Utils.Write(this.x86, 0, 4); // @todo fix target
-                    // @todo this.stack after clean stack
+                    this.opcodes.Add(this.labelsDictionary[op as AASM.Label]);
+                }
+                else if (op is AASM.Call)
+                {
+                    this.opcodes.Add(new x86.Call(this, (op as AASM.Call).Function));
                 }
                 else if (op is AASM.AddSp)
                 {
-                    offset = (op as AASM.AddSp).Offset;
-                    Utils.Write(this.x86, 0xc481, 2); // add esp, ?
-                    Utils.Write(this.x86, (uint)offset, 4);
-                    this.stack += offset;
+                    this.opcodes.Add(new x86.AddEsp(-(op as AASM.AddSp).Offset));
                 }
                 else if (op is AASM.GetLocal)
                 {
-                    offset = (op as AASM.GetLocal).Offset;
-                    Utils.Write(this.x86, 0x458b, 2); // mov eax, dword ptr [ebp+?]
-                    this.x86.Add((byte)offset);
-                    this.EmitPushEax();
+                    this.opcodes.Add(new x86.MovEaxDerefEbp(-(op as AASM.GetLocal).Offset));
+                    this.opcodes.Add(new x86.PushEax());
                 }
                 else if (op is AASM.SetLocal)
                 {
-                    offset = (op as AASM.SetLocal).Offset;
-                    this.EmitPopEax();
-                    this.EmitPushEax(); // We still want it on the stack.
-                    Utils.Write(this.x86, 0x4589, 2); // mov dword ptr [ebp+?], eax
-                    this.x86.Add((byte)offset);
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PushEax()); // We still want it on the stack.
+                    this.opcodes.Add(new x86.SetDerefEbpEax(-(op as AASM.SetLocal).Offset));
                 }
                 else if (op is AASM.Push)
                 {
-                    this.stack += 4;
-                    Utils.Write(this.x86, 0x68, 1); // push ?
-                    Utils.Write(this.x86, (op as AASM.Push).Value, 4);
+                    this.opcodes.Add(new x86.Push((op as AASM.Push).Value));
+                }
+                else if (op is AASM.PushRetVal)
+                {
+                    this.opcodes.Add(new x86.PushEax());
                 }
                 else if (op is AASM.Pop)
                 {
-                    this.EmitPopEax();
+                    this.opcodes.Add(new x86.PopEax());
                 }
                 else if (op is AASM.Add)
                 {
-                    this.EmitPopEax();
-                    this.EmitPopEcx();
-                    Utils.Write(this.x86, 0xc801, 2); // add eax, ecx
-                    this.EmitPushEax();
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.AddEaxEcx());
+                    this.opcodes.Add(new x86.PushEax());
                 }
                 else if (op is AASM.Gt)
                 {
-                    this.EmitPopEax();
-                    this.EmitPopEcx();
-                    Utils.Write(this.x86, 0xc839, 2); // cmp eax, ecx
-                    Utils.Write(this.x86, 0x0477, 2); // ja+4
-                    Utils.Write(this.x86, 0x006a, 2); // push 0
-                    Utils.Write(this.x86, 0x02eb, 2); // jmp+2
-                    Utils.Write(this.x86, 0x016a, 2); // push 1
-                    this.stack += 4;
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PushEaxGtEcx());
                 }
                 else if (op is AASM.Ret)
                 {
-                    Utils.Write(this.x86, 0xc481, 2); // add esp, ?
-                    Utils.Write(this.x86, (uint)this.stack, 4);
-                    this.x86.Add(0xc3); // ret
+                    this.opcodes.Add(new x86.PopEax()); // Get ret val.
+                    this.opcodes.Add(new x86.MovEspEbp());
+                    this.opcodes.Add(new x86.PopEbp());
+                    this.opcodes.Add(new x86.Ret());
                 }
                 else if (op is AASM.Jmp)
                 {
-                    this.x86.Add(0xe9); // jmp
-                    Utils.Write(this.x86, 0, 4); // @todo fix offset
+                    this.opcodes.Add(new x86.Jmp(this.labelsDictionary[(op as AASM.Jmp).Target]));
                 }
                 else if (op is AASM.JmpFalse)
                 {
-                    this.EmitPopEax();
-                    this.x86.Add(0xa9); // test eax, ?
-                    Utils.Write(this.x86, 0, 4);
-                    Utils.Write(this.x86, 0x840f, 4); // je ?
-                    Utils.Write(this.x86, 0, 4); // @todo fix offset
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.CmpEax0());
+                    this.opcodes.Add(new x86.Je(this.labelsDictionary[(op as AASM.JmpFalse).Target]));
                 }
                 else
                 {
                     throw new Exception("Don't know how to emit opcode " + op.ToString());
                 }
             }
+        }
+
+        public void ResolveOffsesInX86()
+        {
+            uint offset = 0;
+
+            for (int i = 0; i < this.opcodes.Count; i++)
+            {
+                x86.Opcode op = this.opcodes[i];
+                op.OffsetInX86 = offset;
+                offset += op.X86Size;
+            }
+
+            this.x86Size = offset;
+        }
+
+        public void LinkFunctions(Dictionary<FunctionStatement, x86FunctionEmitter> functionsDictionary)
+        {
+            for (int i = 0; i < this.opcodes.Count; i++)
+            {
+                if (!(this.opcodes[i] is x86.Call))
+                {
+                    continue;
+                }
+
+                x86.Call op = this.opcodes[i] as x86.Call;
+                op.TargetEmitterFunction = functionsDictionary[op.TargetFunction];
+            }
+        }
+
+        public List<byte> Emit()
+        {
+            List<byte> x86 = new List<byte>();
+            for (int i = 0; i < this.opcodes.Count; i++)
+            {
+                x86.AddRange(this.opcodes[i].Emit());
+            }
+            return x86;
         }
     }
 }

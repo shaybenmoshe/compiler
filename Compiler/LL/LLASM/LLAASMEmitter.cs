@@ -86,29 +86,22 @@ namespace Compiler
         {
             AASM.AASM aasm = new AASM.AASM();
 
-            int beforeCondPos = aasm.Opcodes.Count;
-            aasm.Add(this.cond.LLAASMEmit());
+            AASM.Label afterIfLabel = new Label();
+            AASM.Label afterAllLabel = new Label();
 
-            AASM.JmpFalse condJmp = new JmpFalse(0);
-            aasm.Add(condJmp);
-            
+            aasm.Add(this.cond.LLAASMEmit());
+            aasm.Add(new JmpFalse(afterIfLabel));
+
             aasm.Add(this.body.LLAASMEmit());
-            int condJmpTargetPos = aasm.Opcodes.Count;
+            aasm.Add(afterIfLabel);
 
             if (this.elseBody != null)
             {
-                int beforeSkipElseBodyPos = aasm.Opcodes.Count;
-                AASM.Jmp skipElseBodyJmp = new Jmp(0);
-                aasm.Add(skipElseBodyJmp);
-                condJmpTargetPos = aasm.Opcodes.Count;
-
+                aasm.Add(new Jmp(afterAllLabel));
                 aasm.Add(this.elseBody.LLAASMEmit());
-                int afterElseBodyPos = aasm.Opcodes.Count;
-
-                skipElseBodyJmp.Offset = afterElseBodyPos - beforeSkipElseBodyPos;
             }
 
-            condJmp.Offset = condJmpTargetPos - beforeCondPos;
+            aasm.Add(afterAllLabel);
 
             return aasm;
         }
@@ -180,7 +173,8 @@ namespace Compiler
                 aasm.Add(this.parameters[i].LLAASMEmit());
             }
             aasm.Add(new AASM.Call(this.llTarget));
-            // @todo: clean stack
+            aasm.Add(new AASM.AddSp(-this.parameters.Count * AASM.AASM.AddressSize));
+            aasm.Add(new AASM.PushRetVal());
             return aasm;
         }
     }
