@@ -325,7 +325,7 @@ namespace Compiler
                 return x86;
             }
         }
-
+        
         public class Jmp : Opcode
         {
             private Label label;

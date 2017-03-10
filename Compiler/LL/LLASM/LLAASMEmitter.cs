@@ -80,6 +80,16 @@ namespace Compiler
         }
     }
 
+    public partial class Int3Statement : Statement
+    {
+        public override AASM.AASM LLAASMEmit()
+        {
+            AASM.AASM aasm = new AASM.AASM();
+            aasm.Add(new AASM.Int3());
+            return aasm;
+        }
+    }
+
     public partial class IfElseStatement : Statement
     {
         public override AASM.AASM LLAASMEmit()

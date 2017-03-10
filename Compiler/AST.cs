@@ -185,6 +185,18 @@ namespace Compiler
         }
     }
 
+    public partial class Int3Statement : Statement
+    {
+        public Int3Statement(int position) : base(position)
+        {
+        }
+
+        public override string ToString()
+        {
+            return "int3;";
+        }
+    }
+
     public partial class IfElseStatement : Statement
     {
         private Expression cond;

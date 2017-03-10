@@ -44,8 +44,6 @@ namespace Compiler
 
         public void CreateOpcodes()
         {
-            this.opcodes.Add(new x86.Int3());
-
             this.opcodes.Add(new x86.PushEbp());
             this.opcodes.Add(new x86.MovEbpEsp());
 
@@ -107,6 +105,10 @@ namespace Compiler
                     this.opcodes.Add(new x86.MovEspEbp());
                     this.opcodes.Add(new x86.PopEbp());
                     this.opcodes.Add(new x86.Ret());
+                }
+                else if (op is AASM.Int3)
+                {
+                    this.opcodes.Add(new x86.Int3());
                 }
                 else if (op is AASM.Jmp)
                 {

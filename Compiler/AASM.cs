@@ -127,6 +127,10 @@ namespace Compiler
         {
         }
 
+        public class Int3 : Opcode
+        {
+        }
+
         public class BaseJmp : Opcode
         {
             private Label target;

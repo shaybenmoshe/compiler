@@ -188,6 +188,7 @@ namespace Compiler
             Else,
             Function,
             Return,
+            Int3,
         }
 
         private Keywords value;

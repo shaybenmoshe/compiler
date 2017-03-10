@@ -58,6 +58,13 @@ namespace Compiler
                 return this.ParseFunction();
             }
 
+            if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.Int3))
+            {
+                statement = this.ParseInt3();
+                this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.Semicolon);
+                return statement;
+            }
+
             int startPosition = this.tokenStream.TokenPosition;
             Expression expression = this.TryParseExpression();
             if (expression != null)
@@ -236,6 +243,14 @@ namespace Compiler
             this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Return);
             Expression value = this.ParseExpression();
             return new ReturnStatement(startPosition, value);
+        }
+
+        private Int3Statement ParseInt3()
+        {
+            int startPosition = this.tokenStream.TokenPosition;
+
+            this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.Int3);
+            return new Int3Statement(startPosition);
         }
 
         private FunctionStatement ParseFunction()
