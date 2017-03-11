@@ -140,24 +140,20 @@ function main():uint32 {
 }
 ";*/
             string input = @"
-import KERNEL32 VirtualAlloc VAlloc;
-
 struct Blob {
     x:uint32
 }
 
-function cheat(alloc:Blob):uint32 {
-    int3;
-    alloc = VAlloc(0, 65536, 12288, 4);
-    return 0;
-}
-
 function main():uint32 {
     var alloc:Blob;
-    cheat(alloc);
+    int3;
+    alloc = allocatorSystemAlloc(65536);
+    (alloc.x) = 5;
     return 0;
 }
 ";
+
+            input = System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\allocator") + input;
 
             try
             {

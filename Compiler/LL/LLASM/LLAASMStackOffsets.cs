@@ -25,7 +25,11 @@ namespace Compiler
             for (int i = 0; i < this.llLocals.Count; i++)
             {
                 this.llLocals[i].DefPosition = NameDefStatement.DefPositionTypes.Local;
-                offset += (int)this.llLocals[i].LLAASMType.Size; // This is special to x86, as the stack is the other way around. I think this is correct :(.
+                // We add the offset before writing it.
+                // This is special to x86, as the stack is the other way around.
+                // I think this is correct :(.
+                //offset += (int)this.llLocals[i].LLAASMType.Size;
+                offset += (int)AASM.AASM.AddressSize;
                 this.llLocals[i].LLAASMOffset = offset;
             }
 

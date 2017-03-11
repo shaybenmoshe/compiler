@@ -182,14 +182,14 @@ namespace Compiler
             AASM.AASM aasm = new AASM.AASM();
             if (this.llNameDef.DefPosition == NameDefStatement.DefPositionTypes.Local)
             {
-                if (this.LLAASMType is AASMStructType)
+                /*if (this.LLAASMType is AASMStructType)
                 {
                     aasm.Add(new AASM.GetLocalStruct(this.llNameDef.LLAASMOffset));
                 }
                 else
-                {
+                {*/
                     aasm.Add(new AASM.GetLocal(this.llNameDef.LLAASMOffset));
-                }
+                //}
             }
             else if (this.llNameDef.DefPosition == NameDefStatement.DefPositionTypes.Argument)
             {
@@ -203,14 +203,14 @@ namespace Compiler
             AASM.AASM aasm = new AASM.AASM();
             if (this.llNameDef.DefPosition == NameDefStatement.DefPositionTypes.Local)
             {
-                if (this.LLAASMType is AASMStructType)
+                /*if (this.LLAASMType is AASMStructType)
                 {
                     throw new CompilerException("Can't set local struct", this.Position);
                 }
                 else
-                {
+                {*/
                     aasm.Add(new AASM.SetLocal(this.llNameDef.LLAASMOffset));
-                }
+                //}
             }
             else if (this.llNameDef.DefPosition == NameDefStatement.DefPositionTypes.Argument)
             {
