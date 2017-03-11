@@ -91,6 +91,9 @@ namespace Compiler
         {
             Ass,
             Eq,
+            Neq,
+            And,
+            Or,
             Add,
             Sub,
             Mul,
@@ -190,6 +193,7 @@ namespace Compiler
             Struct,
             If,
             Else,
+            While,
             Function,
             Return,
             Import,

@@ -3,6 +3,82 @@ import KERNEL32 VirtualAlloc VirtualAlloc;
 struct Ptr {
 }
 
-function allocatorSystemAlloc(size:uint32):Ptr {
-	return VirtualAlloc(0, size, 12288, 4);
+function HeapSystemAlloc(size:uint32):Ptr {
+	return VirtualAlloc(0, size, 0x3000, 4);
+}
+
+struct Heap {
+	next:Heap,
+	elementSize:uint32,
+	elementCount:uint32,
+	elements:Ptr,
+}
+
+struct HeapEntry {
+	used:uint32,
+	newBlock:uint32,
+}
+
+function HeapInit(elementSize:uint32, elementCount:uint32):Heap {
+	var heap:Heap;
+	heap = HeapSystemAlloc((elementSize * elementCount) + 0x2000); // @todo: really compute header size...
+	(heap.elementSize) = elementSize;
+	(heap.elementCount) = elementCount;
+	(heap.elements) = heap + 0x2000; // @todo: header size...
+	return heap;
+}
+
+function HeapAllocNoNext(heap:Heap, size:uint32):Ptr {
+	var i:uint32;
+	var firstEntry:HeapEntry;
+	i = 0;
+	
+	firstEntry = heap + (4 * 4); // @todo sizeof Heap
+	
+	while (i < (heap.elementCount)) {
+		var availSize:uint32;
+		var j:uint32;
+		var entry:HeapEntry;
+		
+		entry = firstEntry;
+		j = i;
+		availSize = 0;
+		
+		// Check if we have enough room.
+		while ((availSize < size) && (j < (heap.elementCount)) && ((entry.used) == 0)) {
+			entry = entry + (4 * 2); // @todo sizeof HeapEntry
+			availSize = availSize + (heap.elementSize);
+			j = j + 1;
+		}
+		
+		// We have enough room!
+		if (availSize >= size) {
+			(firstEntry.newBlock) = 1;
+			
+			// Mark used.
+			var k:uint32;
+			entry = firstEntry;
+			k = i;
+			while (k < j) {
+				(entry.used) = 1;
+				entry = entry + (4 * 2); // @todo sizeof HeapEntry
+				k = k + 1;
+			}
+			
+			var result:Ptr;
+			result = (heap.elements);
+			result = result + (i * (heap.elementSize));
+			
+			return result;
+		}
+		
+		i = i + 1;
+		firstEntry = firstEntry + (4 * 2); // @todo sizeof HeapEntry
+	}
+	return 0;
+}
+
+function HeapAlloc(heap:Heap, size:uint32):Ptr {
+	// @todo
+	return HeapAllocNoNext(heap, size);
 }

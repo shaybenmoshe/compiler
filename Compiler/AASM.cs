@@ -162,7 +162,35 @@ namespace Compiler
         {
         }
 
+        public class Eq : Opcode
+        {
+        }
+
+        public class Neq : Opcode
+        {
+        }
+
+        public class And : Opcode
+        {
+        }
+
+        public class Or : Opcode
+        {
+        }
+
         public class Gt : Opcode
+        {
+        }
+
+        public class Lt : Opcode
+        {
+        }
+
+        public class Gte : Opcode
+        {
+        }
+
+        public class Lte : Opcode
         {
         }
 

@@ -118,6 +118,29 @@ namespace Compiler
         }
     }
 
+    public partial class WhileStatement : Statement
+    {
+        public override AASM.AASM LLAASMEmit()
+        {
+            AASM.AASM aasm = new AASM.AASM();
+
+            AASM.Label beforeCondLabel = new Label();
+            AASM.Label afterWhileLabel = new Label();
+
+            aasm.Add(beforeCondLabel);
+            aasm.Add(this.cond.LLAASMEmit());
+            aasm.Add(new JmpFalse(afterWhileLabel));
+
+            aasm.Add(this.body.LLAASMEmit());
+
+            aasm.Add(new Jmp(beforeCondLabel));
+
+            aasm.Add(afterWhileLabel);
+
+            return aasm;
+        }
+    }
+
     public partial class ExpressionStatement : Statement
     {
         public override AASM.AASM LLAASMEmit()
@@ -264,6 +287,18 @@ namespace Compiler
 
             switch (this.binaryOpToken.Value)
             {
+                case BinaryOpToken.Ops.Eq:
+                    aasm.Add(new AASM.Eq());
+                    break;
+                case BinaryOpToken.Ops.Neq:
+                    aasm.Add(new AASM.Neq());
+                    break;
+                case BinaryOpToken.Ops.And:
+                    aasm.Add(new AASM.And());
+                    break;
+                case BinaryOpToken.Ops.Or:
+                    aasm.Add(new AASM.Or());
+                    break;
                 case BinaryOpToken.Ops.Add:
                     aasm.Add(new AASM.Add());
                     break;
@@ -275,6 +310,15 @@ namespace Compiler
                     break;
                 case BinaryOpToken.Ops.Gt:
                     aasm.Add(new AASM.Gt());
+                    break;
+                case BinaryOpToken.Ops.Lt:
+                    aasm.Add(new AASM.Lt());
+                    break;
+                case BinaryOpToken.Ops.Gte:
+                    aasm.Add(new AASM.Gte());
+                    break;
+                case BinaryOpToken.Ops.Lte:
+                    aasm.Add(new AASM.Lte());
                     break;
                 default:
                     throw new CompilerException("Don't know how to AASM binary op " + this.binaryOpToken.Value + ".", this.Position);

@@ -107,6 +107,20 @@ namespace Compiler
                 {
                     this.opcodes.Add(new x86.PopEax());
                 }
+                else if (op is AASM.And)
+                {
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.AndEaxEcx());
+                    this.opcodes.Add(new x86.PushEax());
+                }
+                else if (op is AASM.Or)
+                {
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.OrEaxEcx());
+                    this.opcodes.Add(new x86.PushEax());
+                }
                 else if (op is AASM.Add)
                 {
                     this.opcodes.Add(new x86.PopEcx());
@@ -128,11 +142,41 @@ namespace Compiler
                     this.opcodes.Add(new x86.MulEaxEcx());
                     this.opcodes.Add(new x86.PushEax());
                 }
+                else if (op is AASM.Eq)
+                {
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PushEaxEqEcx());
+                }
+                else if (op is AASM.Neq)
+                {
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PushEaxNeqEcx());
+                }
                 else if (op is AASM.Gt)
                 {
                     this.opcodes.Add(new x86.PopEcx());
                     this.opcodes.Add(new x86.PopEax());
                     this.opcodes.Add(new x86.PushEaxGtEcx());
+                }
+                else if (op is AASM.Lt)
+                {
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PushEaxLtEcx());
+                }
+                else if (op is AASM.Gte)
+                {
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PushEaxGteEcx());
+                }
+                else if (op is AASM.Lte)
+                {
+                    this.opcodes.Add(new x86.PopEcx());
+                    this.opcodes.Add(new x86.PopEax());
+                    this.opcodes.Add(new x86.PushEaxLteEcx());
                 }
                 else if (op is AASM.Ret)
                 {

@@ -268,6 +268,37 @@ namespace Compiler
         }
     }
 
+    public partial class WhileStatement : Statement
+    {
+        private Expression cond;
+        private Statement body;
+
+        public WhileStatement(int position, Expression cond, Statement body) : base(position)
+        {
+            this.cond = cond;
+            this.body = body;
+        }
+
+        public override void TraverseStatements(Action<Statement> cb)
+        {
+            base.TraverseStatements(cb);
+            this.body.TraverseStatements(cb);
+        }
+
+        public override void TraverseExpressions(Action<Expression> cb)
+        {
+            base.TraverseExpressions(cb);
+            this.cond.TraverseExpressions(cb);
+            this.body.TraverseExpressions(cb);
+        }
+
+        public override string ToString()
+        {
+            string s = "while (" + this.cond.ToString() + ") " + this.body.ToString();
+            return s;
+        }
+    }
+
     public partial class StructStatement : Statement
     {
         private NameToken name;

@@ -66,15 +66,18 @@ namespace Compiler
             if (this.inputStream.NextIs(',')) { return new PunctToken(startPos, PunctToken.Puncts.Comma); }
 
             // Binary op.
-            if (this.inputStream.NextIs('=')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Ass); }
             if (this.inputStream.NextIs("==")) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Eq); }
+            if (this.inputStream.NextIs('=')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Ass); }
+            if (this.inputStream.NextIs("!=")) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Neq); }
+            if (this.inputStream.NextIs("&&")) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.And); }
+            if (this.inputStream.NextIs("||")) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Or); }
             if (this.inputStream.NextIs('+')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Add); }
             if (this.inputStream.NextIs('-')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Sub); }
             if (this.inputStream.NextIs('*')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Mul); }
-            if (this.inputStream.NextIs('>')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Gt); }
             if (this.inputStream.NextIs(">=")) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Gte); }
-            if (this.inputStream.NextIs('<')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Lt); }
+            if (this.inputStream.NextIs('>')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Gt); }
             if (this.inputStream.NextIs("<=")) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Lte); }
+            if (this.inputStream.NextIs('<')) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Lt); }
             if (this.inputStream.NextIs(".")) { return new BinaryOpToken(startPos, BinaryOpToken.Ops.Dot); }
 
             // Keyword.
@@ -82,6 +85,7 @@ namespace Compiler
             if (this.inputStream.NextIs("struct")) { return new KeywordToken(startPos, KeywordToken.Keywords.Struct); }
             if (this.inputStream.NextIs("if")) { return new KeywordToken(startPos, KeywordToken.Keywords.If); }
             if (this.inputStream.NextIs("else")) { return new KeywordToken(startPos, KeywordToken.Keywords.Else); }
+            if (this.inputStream.NextIs("while")) { return new KeywordToken(startPos, KeywordToken.Keywords.While); }
             if (this.inputStream.NextIs("function")) { return new KeywordToken(startPos, KeywordToken.Keywords.Function); }
             if (this.inputStream.NextIs("return")) { return new KeywordToken(startPos, KeywordToken.Keywords.Return); }
             if (this.inputStream.NextIs("import")) { return new KeywordToken(startPos, KeywordToken.Keywords.Import); }

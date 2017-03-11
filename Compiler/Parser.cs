@@ -59,6 +59,11 @@ namespace Compiler
                 return this.ParseIfElse();
             }
 
+            if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.While))
+            {
+                return this.ParseWhile();
+            }
+
             if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.Function))
             {
                 return this.ParseFunction();
@@ -225,6 +230,22 @@ namespace Compiler
             }
 
             return new IfElseStatement(startPosition, cond, body, elseBody);
+        }
+
+        private WhileStatement ParseWhile()
+        {
+            int startPosition = this.tokenStream.TokenPosition;
+
+            this.tokenStream.EnsureNextIsKeyword(KeywordToken.Keywords.While);
+            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.LParenthese);
+
+            Expression cond = this.ParseExpression();
+
+            this.tokenStream.EnsureNextIsPunct(PunctToken.Puncts.RParenthese);
+
+            Statement body = this.ParseNext();
+
+            return new WhileStatement(startPosition, cond, body);
         }
 
         private bool PeekNextIsCall()

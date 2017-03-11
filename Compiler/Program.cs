@@ -140,15 +140,22 @@ function main():uint32 {
 }
 ";*/
             string input = @"
-struct Blob {
-    x:uint32
-}
-
 function main():uint32 {
-    var alloc:Blob;
+    var heap:Heap;
+    heap = HeapInit(0x1000, 0x10);
+
+    var p1:Ptr;
+    p1 = HeapAlloc(heap, 0x2200);
     int3;
-    alloc = allocatorSystemAlloc(65536);
-    (alloc.x) = 5;
+
+    var p2:Ptr;
+    p2 = HeapAlloc(heap, 0x200);
+    int3;
+
+    var p3:Ptr;
+    p3 = HeapAlloc(heap, 0x7000);
+    int3;
+
     return 0;
 }
 ";

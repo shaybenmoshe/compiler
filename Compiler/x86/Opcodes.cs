@@ -297,6 +297,26 @@ namespace Compiler
             }
         }
 
+        public class AndEaxEcx : Opcode
+        {
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0xc821, 2); // and eax, ecx
+                return x86;
+            }
+        }
+
+        public class OrEaxEcx : Opcode
+        {
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0xc809, 2); // or eax, ecx
+                return x86;
+            }
+        }
+
         public class AddEaxEcx : Opcode
         {
             public override List<byte> Emit()
@@ -394,6 +414,44 @@ namespace Compiler
             }
         }
 
+        public class PushEaxEqEcx : Opcode
+        {
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0xc839, 2); // cmp eax, ecx
+                Utils.Write(x86, 0x0474, 2); // je+4
+                Utils.Write(x86, 0x006a, 2); // push 0
+                Utils.Write(x86, 0x02eb, 2); // jmp+2
+                Utils.Write(x86, 0x016a, 2); // push 1
+                return x86;
+            }
+
+            public override int GetStackChange()
+            {
+                return 4;
+            }
+        }
+
+        public class PushEaxNeqEcx : Opcode
+        {
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0xc839, 2); // cmp eax, ecx
+                Utils.Write(x86, 0x0475, 2); // jne+4
+                Utils.Write(x86, 0x006a, 2); // push 0
+                Utils.Write(x86, 0x02eb, 2); // jmp+2
+                Utils.Write(x86, 0x016a, 2); // push 1
+                return x86;
+            }
+
+            public override int GetStackChange()
+            {
+                return 4;
+            }
+        }
+
         public class PushEaxGtEcx : Opcode
         {
             public override List<byte> Emit()
@@ -401,6 +459,63 @@ namespace Compiler
                 List<byte> x86 = new List<byte>();
                 Utils.Write(x86, 0xc839, 2); // cmp eax, ecx
                 Utils.Write(x86, 0x0477, 2); // ja+4
+                Utils.Write(x86, 0x006a, 2); // push 0
+                Utils.Write(x86, 0x02eb, 2); // jmp+2
+                Utils.Write(x86, 0x016a, 2); // push 1
+                return x86;
+            }
+
+            public override int GetStackChange()
+            {
+                return 4;
+            }
+        }
+
+        public class PushEaxLtEcx : Opcode
+        {
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0xc839, 2); // cmp eax, ecx
+                Utils.Write(x86, 0x0472, 2); // jb+4
+                Utils.Write(x86, 0x006a, 2); // push 0
+                Utils.Write(x86, 0x02eb, 2); // jmp+2
+                Utils.Write(x86, 0x016a, 2); // push 1
+                return x86;
+            }
+
+            public override int GetStackChange()
+            {
+                return 4;
+            }
+        }
+
+        public class PushEaxGteEcx : Opcode
+        {
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0xc839, 2); // cmp eax, ecx
+                Utils.Write(x86, 0x0473, 2); // jae+4
+                Utils.Write(x86, 0x006a, 2); // push 0
+                Utils.Write(x86, 0x02eb, 2); // jmp+2
+                Utils.Write(x86, 0x016a, 2); // push 1
+                return x86;
+            }
+
+            public override int GetStackChange()
+            {
+                return 4;
+            }
+        }
+
+        public class PushEaxLteEcx : Opcode
+        {
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0xc839, 2); // cmp eax, ecx
+                Utils.Write(x86, 0x0476, 2); // jbe+4
                 Utils.Write(x86, 0x006a, 2); // push 0
                 Utils.Write(x86, 0x02eb, 2); // jmp+2
                 Utils.Write(x86, 0x016a, 2); // push 1

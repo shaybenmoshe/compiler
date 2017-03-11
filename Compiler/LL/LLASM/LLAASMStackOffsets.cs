@@ -29,7 +29,7 @@ namespace Compiler
                 // This is special to x86, as the stack is the other way around.
                 // I think this is correct :(.
                 //offset += (int)this.llLocals[i].LLAASMType.Size;
-                offset += (int)AASM.AASM.AddressSize;
+                offset += (int)AASM.AASM.AddressSize; // Everything is a pointer.
                 this.llLocals[i].LLAASMOffset = offset;
             }
 
@@ -40,7 +40,8 @@ namespace Compiler
             {
                 this.arguments[i].DefPosition = NameDefStatement.DefPositionTypes.Argument;
                 this.arguments[i].LLAASMOffset = offset;
-                offset += (int)this.arguments[i].LLAASMType.Size;
+                //offset += (int)this.llLocals[i].LLAASMType.Size;
+                offset += (int)AASM.AASM.AddressSize; // Everything is a pointer.
             }
         }
     }
