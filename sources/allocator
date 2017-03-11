@@ -7,20 +7,20 @@ function HeapSystemAlloc(size:uint32):Ptr {
 	return VirtualAlloc(0, size, 0x3000, 4);
 }
 
-struct Heap {
-	next:Heap,
+struct CoalesceHeap {
+	next:CoalesceHeap,
 	elementSize:uint32,
 	elementCount:uint32,
 	elements:Ptr,
 }
 
-struct HeapEntry {
+struct CoalesceHeapEntry {
 	used:uint32,
 	newBlock:uint32,
 }
 
-function HeapInit(elementSize:uint32, elementCount:uint32):Heap {
-	var heap:Heap;
+function CoalesceHeapInit(elementSize:uint32, elementCount:uint32):CoalesceHeap {
+	var heap:CoalesceHeap;
 	heap = HeapSystemAlloc((elementSize * elementCount) + 0x2000); // @todo: really compute header size...
 	(heap.elementSize) = elementSize;
 	(heap.elementCount) = elementCount;
@@ -28,17 +28,17 @@ function HeapInit(elementSize:uint32, elementCount:uint32):Heap {
 	return heap;
 }
 
-function HeapAllocNoNext(heap:Heap, size:uint32):Ptr {
+function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 	var i:uint32;
-	var firstEntry:HeapEntry;
+	var firstEntry:CoalesceHeapEntry;
 	i = 0;
 	
-	firstEntry = heap + (4 * 4); // @todo sizeof Heap
+	firstEntry = heap + (4 * 4); // @todo sizeof CoalesceHeap
 	
 	while (i < (heap.elementCount)) {
 		var availSize:uint32;
 		var j:uint32;
-		var entry:HeapEntry;
+		var entry:CoalesceHeapEntry;
 		
 		entry = firstEntry;
 		j = i;
@@ -46,7 +46,7 @@ function HeapAllocNoNext(heap:Heap, size:uint32):Ptr {
 		
 		// Check if we have enough room.
 		while ((availSize < size) && (j < (heap.elementCount)) && ((entry.used) == 0)) {
-			entry = entry + (4 * 2); // @todo sizeof HeapEntry
+			entry = entry + (4 * 2); // @todo sizeof CoalesceHeapEntry
 			availSize = availSize + (heap.elementSize);
 			j = j + 1;
 		}
@@ -61,24 +61,38 @@ function HeapAllocNoNext(heap:Heap, size:uint32):Ptr {
 			k = i;
 			while (k < j) {
 				(entry.used) = 1;
-				entry = entry + (4 * 2); // @todo sizeof HeapEntry
+				entry = entry + (4 * 2); // @todo sizeof CoalesceHeapEntry
 				k = k + 1;
 			}
 			
 			var result:Ptr;
-			result = (heap.elements);
-			result = result + (i * (heap.elementSize));
+			result = (heap.elements) + (i * (heap.elementSize));
 			
 			return result;
 		}
 		
 		i = i + 1;
-		firstEntry = firstEntry + (4 * 2); // @todo sizeof HeapEntry
+		firstEntry = firstEntry + (4 * 2); // @todo sizeof CoalesceHeapEntry
 	}
 	return 0;
 }
 
-function HeapAlloc(heap:Heap, size:uint32):Ptr {
-	// @todo
-	return HeapAllocNoNext(heap, size);
+function CoalesceHeapAlloc(heap:CoalesceHeap, size:uint32):Ptr {
+	var result:Ptr;
+	
+	result = CoalesceHeapAllocNoNext(heap, size);
+	if (result != 0) {
+		return result;
+	}
+	
+	while ((heap.next) != 0) {
+		heap = heap.next;
+		result = CoalesceHeapAllocNoNext(heap, size);
+		if (result != 0) {
+			return result;
+		}
+	}
+	
+	(heap.next) = CoalesceHeapInit((heap.elementSize), (heap.elementCount));
+	return CoalesceHeapAllocNoNext((heap.next), size);
 }

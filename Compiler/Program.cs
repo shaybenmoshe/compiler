@@ -141,19 +141,21 @@ function main():uint32 {
 ";*/
             string input = @"
 function main():uint32 {
-    var heap:Heap;
-    heap = HeapInit(0x1000, 0x10);
+    var heap:CoalesceHeap;
+    heap = CoalesceHeapInit(0x1000, 9);
 
-    var p1:Ptr;
-    p1 = HeapAlloc(heap, 0x2200);
+    var p:Ptr;
+    p = CoalesceHeapAlloc(heap, 0x4000);
     int3;
-
-    var p2:Ptr;
-    p2 = HeapAlloc(heap, 0x200);
+    p = CoalesceHeapAlloc(heap, 0x4000);
     int3;
-
-    var p3:Ptr;
-    p3 = HeapAlloc(heap, 0x7000);
+    p = CoalesceHeapAlloc(heap, 0x4000);
+    int3;
+    p = CoalesceHeapAlloc(heap, 0x4000);
+    int3;
+    p = CoalesceHeapAlloc(heap, 0x4000);
+    int3;
+    p = CoalesceHeapAlloc(heap, 0x1000);
     int3;
 
     return 0;
