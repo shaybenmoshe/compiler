@@ -40,11 +40,16 @@ function sizeOfCoalesceHeapElement():uint32 {
 		return 4 * 2;
 }
 
-function CoalesceHeapInit(elementSize:uint32, elementCount:uint32):CoalesceHeap {
+function CoalesceHeapSystemAllocAndInit(elementSize:uint32, elementCount:uint32):CoalesceHeap {
 	var heap:CoalesceHeap;
 	
 	heap = HeapSystemAlloc((elementSize * elementCount) + CoalesceHeapHeaderSize(elementCount));
+	CoalesceHeapInit(heap, elementSize, elementCount);
 	
+	return heap;
+}
+
+function CoalesceHeapInit(heap:CoalesceHeap, elementSize:uint32, elementCount:uint32):CoalesceHeap {
 	(heap.elementSize) = elementSize;
 	(heap.elementCount) = elementCount;
 	(heap.elements) = heap + CoalesceHeapHeaderSize(elementCount);
@@ -109,7 +114,7 @@ function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 	return 0;
 }
 
-function CoalesceHeapAlloc(heap:CoalesceHeap, size:uint32):Ptr {
+function CoalesceHeapAllocNoHeapAlloc(heap:CoalesceHeap, size:uint32):Ptr {
 	var result:Ptr;
 	
 	result = CoalesceHeapAllocNoNext(heap, size);
@@ -125,6 +130,17 @@ function CoalesceHeapAlloc(heap:CoalesceHeap, size:uint32):Ptr {
 		}
 	}
 	
-	(heap.next) = CoalesceHeapInit((heap.elementSize), (heap.elementCount));
+	return 0;
+}
+
+function CoalesceHeapAllocSystem(heap:CoalesceHeap, size:uint32):Ptr {
+	var result:Ptr;
+	
+	result = CoalesceHeapAllocNoHeapAlloc(heap, size);
+	if (result != 0) {
+		return result;
+	}
+	
+	(heap.next) = CoalesceHeapSystemAllocAndInit((heap.elementSize), (heap.elementCount));
 	return CoalesceHeapAllocNoNext((heap.next), size);
 }
