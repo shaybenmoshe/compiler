@@ -29,6 +29,29 @@ namespace Compiler
             }
         }
 
+        public static void Write(List<byte> list, string str)
+        {
+            for (int i = 0; i < str.Length; i++)
+            {
+                list.Add((byte)str[i]);
+            }
+            list.Add(0);
+        }
+
+        public static void Write(List<byte> list, string str, int size)
+        {
+            int i;
+            for (i = 0; i < str.Length; i++)
+            {
+                list.Add((byte)str[i]);
+            }
+            while (i < size)
+            {
+                list.Add(0);
+                i++;
+            }
+        }
+
         public static void Rewrite(List<byte> list, uint value, int size, int offset)
         {
             while (size > 0)

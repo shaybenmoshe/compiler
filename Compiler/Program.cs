@@ -68,7 +68,7 @@ function fact(x:uint32):uint32 {
     return 1;
 }
 ";*/
-            string input = @"
+            /*string input = @"
 struct FibPair {
     x:uint32,
     y:uint32,
@@ -76,7 +76,7 @@ struct FibPair {
 
 function main():uint32 {
     var a:FibPair;
-    int3;
+    //int3;
     (a.x) = 0;
     (a.y) = 1;
     fibPairStep(a);
@@ -95,7 +95,7 @@ function fibPairStep(a:FibPair):uint32 {
     (a.y) = t;
     return 0;
 }
-";
+";*/
             /*string input = @"
 struct A {
     x:uint32,
@@ -139,24 +139,25 @@ function main():uint32 {
     return 0;
 }
 ";*/
-            /*string input = @"
-import Kernel32 VirtualAlloc VAlloc;
+            string input = @"
+import KERNEL32 VirtualAlloc VAlloc;
 
 struct Blob {
     x:uint32
-}
-
-function main():uint32 {
-    var alloc:Blob;
-    cheat(alloc);
-    return 0;
 }
 
 function cheat(alloc:Blob):uint32 {
     alloc = VAlloc(1,2);
     return 0;
 }
-";*/
+
+function main():uint32 {
+    int3;
+    var alloc:Blob;
+    cheat(alloc);
+    return 0;
+}
+";
 
             try
             {

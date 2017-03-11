@@ -14,7 +14,6 @@ namespace Compiler
             this.EmitDataDirectories();
             int afterOptionalHeaders = this.output.Count;
             this.EmitSections();
-            this.AlignToSectionAlignment();
             
             this.valuesFixers[ValuesFixerKeys.SizeOfOptionalHeaders].Value = (uint)(afterOptionalHeaders - beforeOptionalHeaders);
             this.valuesFixers[ValuesFixerKeys.SizeOfOptionalHeaders].Size = 2;
@@ -43,7 +42,7 @@ namespace Compiler
             this.output.Add(0);
 
             Utils.Write(this.output, 0x014c, 2); // Machine = x86
-            Utils.Write(this.output, 1, 2); // @todo Number of sections
+            Utils.Write(this.output, 2, 2); // @todo Number of sections
             Utils.Write(this.output, 0, 4); // Timestamp
             Utils.Write(this.output, 0, 4); // Symbols stuff
             Utils.Write(this.output, 0, 4); // Symbols stuff
@@ -64,6 +63,7 @@ namespace Compiler
             this.output.Add(0); // Minor linker version
             this.valuesFixers[ValuesFixerKeys.CodeDiskSize].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Size of code
+            this.valuesFixers[ValuesFixerKeys.ImportsDiskOffset].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Size of initialized data
             Utils.Write(this.output, 0, 4); // Size of uninitialized data
             this.valuesFixers[ValuesFixerKeys.EntryPoint].Targets.Add(this.output.Count);
@@ -71,8 +71,8 @@ namespace Compiler
             this.valuesFixers[ValuesFixerKeys.CodeVirtualOffset].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Offset of code
             Utils.Write(this.output, 0, 4); // Offset of data
-            Utils.Write(this.output, 0x00400000, 4); // Image base
-            Utils.Write(this.output, 0x1000, 4); // Section alignment
+            Utils.Write(this.output, imageBase, 4); // Image base
+            Utils.Write(this.output, pageSize, 4); // Section alignment
             Utils.Write(this.output, sectionAlignmentSize, 4); // File alignment
             Utils.Write(this.output, 5, 2); // Major os
             Utils.Write(this.output, 1, 2); // Minor os
@@ -107,7 +107,9 @@ namespace Compiler
             // RVA, Size
             Utils.Write(this.output, 0, 4); // Export
             Utils.Write(this.output, 0, 4);
+            this.valuesFixers[ValuesFixerKeys.ImageImportDescriptorsVirtualOffset].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Import
+            this.valuesFixers[ValuesFixerKeys.ImageImportDescriptorsVirtualSize].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4);
             Utils.Write(this.output, 0, 4); // Resource
             Utils.Write(this.output, 0, 4);
@@ -129,7 +131,9 @@ namespace Compiler
             Utils.Write(this.output, 0, 4);
             Utils.Write(this.output, 0, 4); // Bound
             Utils.Write(this.output, 0, 4);
+            this.valuesFixers[ValuesFixerKeys.ImportsVirtualOffset].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // IAT
+            this.valuesFixers[ValuesFixerKeys.ImportsVirtualSize].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4);
             Utils.Write(this.output, 0, 4); // Delay import
             Utils.Write(this.output, 0, 4);
@@ -141,29 +145,48 @@ namespace Compiler
 
         private void EmitSections()
         {
-            this.output.Add((byte)'.');
-            this.output.Add((byte)'t');
-            this.output.Add((byte)'e');
-            this.output.Add((byte)'x');
-            this.output.Add((byte)'t');
-            this.output.Add(0);
-            this.output.Add(0);
-            this.output.Add(0);
-            
+            uint flags;
+
+
+            // Imports
+            Utils.Write(this.output, ".rdata", 8);
+
+            this.valuesFixers[ValuesFixerKeys.ImportsVirtualSize].Targets.Add(this.output.Count);
+            Utils.Write(this.output, 0, 4); // Virtual size
+            this.valuesFixers[ValuesFixerKeys.ImportsVirtualOffset].Targets.Add(this.output.Count);
+            Utils.Write(this.output, 0, 4); // RVA
+            this.valuesFixers[ValuesFixerKeys.ImportsDiskSize].Targets.Add(this.output.Count);
+            Utils.Write(this.output, 0, 4); // Size of raw data
+            this.valuesFixers[ValuesFixerKeys.ImportsDiskOffset].Targets.Add(this.output.Count);
+            Utils.Write(this.output, 0, 4); // Offset of imports in file
+            Utils.Write(this.output, 0, 4); // Relocations
+            Utils.Write(this.output, 0, 4); // Line numbers
+            Utils.Write(this.output, 0, 2); // Num of relocations
+            Utils.Write(this.output, 0, 2); // Num of line numbers
+
+            flags = 0;
+            flags |= 0x00000040; // Initialized data.
+            flags |= 0x40000000; // Read.
+            Utils.Write(this.output, flags, 4); // Flags
+
+
+            // Code
+            Utils.Write(this.output, ".text", 8);
+
             this.valuesFixers[ValuesFixerKeys.CodeVirtualSize].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Virtual size
             this.valuesFixers[ValuesFixerKeys.CodeVirtualOffset].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // RVA
             this.valuesFixers[ValuesFixerKeys.CodeDiskSize].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Size of raw data
-            this.valuesFixers[ValuesFixerKeys.CodeRVA].Targets.Add(this.output.Count);
+            this.valuesFixers[ValuesFixerKeys.CodeDiskOffset].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Offset of code in file
             Utils.Write(this.output, 0, 4); // Relocations
             Utils.Write(this.output, 0, 4); // Line numbers
             Utils.Write(this.output, 0, 2); // Num of relocations
             Utils.Write(this.output, 0, 2); // Num of line numbers
 
-            uint flags = 0;
+            flags = 0;
             flags |= 0x00000020; // Contains code.
             flags |= 0x20000000; // Exec.
             flags |= 0x40000000; // Read.
