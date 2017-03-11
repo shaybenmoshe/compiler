@@ -50,6 +50,8 @@ namespace Compiler
 
     public partial class FunctionStatement : Statement
     {
+        private LL ll;
+
         private IAASMType llAASMRetType;
 
         public IAASMType LLAASMRetType
@@ -59,15 +61,17 @@ namespace Compiler
 
         public void LLNamesResolver(LL ll)
         {
-            this.llAASMRetType = ll.LLResolveType(this.retType.Value);
+            this.ll = ll;
+
+            this.llAASMRetType = this.ll.LLResolveType(this.retType.Value);
 
             for (int i = 0; i < this.llLocals.Count; i++)
             {
-                this.llLocals[i].LLAASMType = ll.LLResolveType(this.llLocals[i].Type.Value);
+                this.llLocals[i].LLAASMType = this.ll.LLResolveType(this.llLocals[i].Type.Value);
             }
             for (int i = 0; i < this.arguments.Count; i++)
             {
-                this.arguments[i].LLAASMType = ll.LLResolveType(this.arguments[i].Type.Value);
+                this.arguments[i].LLAASMType = this.ll.LLResolveType(this.arguments[i].Type.Value);
             }
 
             this.TraverseExpressions(this.LLRenewName);
@@ -101,6 +105,11 @@ namespace Compiler
             else if (expression is MemberAccessExpression)
             {
                 (expression as MemberAccessExpression).LLResolveMemberIndex();
+            }
+            else if (expression is SizeofExpression)
+            {
+                SizeofExpression sizeofExpression = expression as SizeofExpression;
+                sizeofExpression.LLAASMType = this.ll.LLResolveType(sizeofExpression.TypeName.Value);
             }
         }
     }
@@ -158,6 +167,17 @@ namespace Compiler
         {
             get { return this.llNameDef; }
             set { this.llNameDef = value; }
+        }
+    }
+
+    public partial class SizeofExpression : Expression
+    {
+        private IAASMType llAASMType;
+
+        public IAASMType LLAASMType
+        {
+            get { return this.llAASMType; }
+            set { this.llAASMType = value; }
         }
     }
 

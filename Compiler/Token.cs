@@ -197,6 +197,7 @@ namespace Compiler
             Function,
             Return,
             Import,
+            Sizeof,
             Int3,
         }
 

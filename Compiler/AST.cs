@@ -515,6 +515,26 @@ namespace Compiler
         }
     }
 
+    public partial class SizeofExpression : Expression
+    {
+        private NameToken typeName;
+
+        public SizeofExpression(int position, NameToken typeName) : base(position)
+        {
+            this.typeName = typeName;
+        }
+
+        public NameToken TypeName
+        {
+            get { return this.typeName; }
+        }
+
+        public override string ToString()
+        {
+            return "sizeof " + this.typeName.ToString();
+        }
+    }
+
     public partial class CallExpression : Expression
     {
         private NameToken name;

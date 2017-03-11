@@ -179,6 +179,12 @@ namespace Compiler
                 return this.ParseCall();
             }
 
+            if (this.tokenStream.PeekNextIsKeyword(KeywordToken.Keywords.Sizeof))
+            {
+                this.tokenStream.Next();
+                return new SizeofExpression(startPosition, this.tokenStream.NextName());
+            }
+
             // @todo
             /*if (this.tokenStream.PeekNextIsType(Token.Types.String))
             {

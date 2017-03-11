@@ -243,6 +243,16 @@ namespace Compiler
         }
     }
 
+    public partial class SizeofExpression : Expression
+    {
+        public override AASM.AASM LLAASMEmit()
+        {
+            AASM.AASM aasm = new AASM.AASM();
+            aasm.Add(new AASM.Push(this.LLAASMType.Size));
+            return aasm;
+        }
+    }
+
     public partial class CallExpression : Expression
     {
         public override AASM.AASM LLAASMEmit()
