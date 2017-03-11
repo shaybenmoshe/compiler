@@ -110,7 +110,7 @@ namespace Compiler
                 // Hex.
                 if (this.inputStream.NextIs("0x"))
                 {
-                    do
+                    while (!this.inputStream.Ended() && this.ValidNumberCharHex(this.inputStream.PeekNext()))
                     {
                         char curChar = this.inputStream.Next();
                         uint curVal;
@@ -120,10 +120,10 @@ namespace Compiler
                         }
                         else
                         {
-                            curVal = (uint)(curChar - 'a');
+                            curVal = (uint)(curChar - 'a' + 10);
                         }
                         val = val * 16 + curVal;
-                    } while (!this.inputStream.Ended() && this.ValidNumberCharHex(this.inputStream.PeekNext()));
+                    }
                 }
                 // Dec.
                 else
