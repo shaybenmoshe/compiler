@@ -99,22 +99,50 @@ namespace Compiler
             }
 
             // Number.
-            if (this.ValidNumberChar(this.inputStream.PeekNext()))
+            if (this.ValidNumberCharDec(this.inputStream.PeekNext()))
             {
                 uint val = 0;
-                do
+                // Hex.
+                if (this.inputStream.NextIs("0x"))
                 {
-                    val = val*10 + (uint) (this.inputStream.Next() - '0');
-                } while (!this.inputStream.Ended() && this.ValidNumberChar(this.inputStream.PeekNext()));
+                    do
+                    {
+                        char curChar = this.inputStream.Next();
+                        uint curVal;
+                        if (this.ValidNumberCharDec(curChar))
+                        {
+                            curVal = (uint)(curChar - '0');
+                        }
+                        else
+                        {
+                            curVal = (uint)(curChar - 'a');
+                        }
+                        val = val * 16 + curVal;
+                    } while (!this.inputStream.Ended() && this.ValidNumberCharHex(this.inputStream.PeekNext()));
+                }
+                // Dec.
+                else
+                {
+                    do
+                    {
+                        val = val*10 + (uint) (this.inputStream.Next() - '0');
+                    } while (!this.inputStream.Ended() && this.ValidNumberCharDec(this.inputStream.PeekNext()));
+                }
+
                 return new NumberToken(startPos, val);
             }
 
             throw new CompilerException("Invalid token found.", this.inputStream.Position);
         }
 
-        private bool ValidNumberChar(char c)
+        private bool ValidNumberCharDec(char c)
         {
             return '0' <= c && c <= '9';
+        }
+
+        private bool ValidNumberCharHex(char c)
+        {
+            return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f');
         }
 
         private bool ValidNameFirstChar(char c)
