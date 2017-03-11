@@ -47,6 +47,21 @@ namespace Compiler
             }
         }
 
+        public class CallImport : Opcode
+        {
+            private ImportStatement import;
+
+            public CallImport(ImportStatement import)
+            {
+                this.import = import;
+            }
+
+            public ImportStatement Import
+            {
+                get { return this.import; }
+            }
+        }
+
         public class AddSp : Opcode
         {
             private int offset;

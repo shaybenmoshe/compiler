@@ -42,7 +42,7 @@ namespace Compiler
             }
         }
 
-        public void CreateOpcodes()
+        public void CreateOpcodes(Dictionary<string, uint> importAddresses)
         {
             this.opcodes.Add(new x86.PushEbp());
             this.opcodes.Add(new x86.MovEbpEsp());
@@ -58,6 +58,11 @@ namespace Compiler
                 else if (op is AASM.Call)
                 {
                     this.opcodes.Add(new x86.Call(this, (op as AASM.Call).Function));
+                }
+                else if (op is AASM.CallImport)
+                {
+                    uint address = importAddresses[(op as AASM.CallImport).Import.ImportedName.Value];
+                    this.opcodes.Add(new x86.CallAbsolute(address));
                 }
                 else if (op is AASM.AddSp)
                 {

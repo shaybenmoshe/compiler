@@ -30,10 +30,16 @@ namespace Compiler
         private uint importsOffset;
 
         private Dictionary<string, DLLImports> dllImportsDictionary = new Dictionary<string, DLLImports>();
+        private Dictionary<string, uint> importAddresses = new Dictionary<string, uint>();
 
         public uint ImportCurrentRVA
         {
             get { return (uint)this.output.Count + this.importsRVA - this.importsOffset; }
+        }
+
+        public Dictionary<string, uint> ImportAddresses
+        {
+            get { return this.importAddresses; }
         }
 
         public void EmitImports(List<ImportStatement> imports)
@@ -105,9 +111,7 @@ namespace Compiler
 
                 for (int i = 0; i < dllImports.Imports.Count; i++)
                 {
-                    // Address will be written to here
-                    this.valuesFixersStr["import." + dllImports.Imports[i].ImportedName] = new ValuesFixer();
-                    this.valuesFixersStr["import." + dllImports.Imports[i].ImportedName].Value = this.ImportCurrentRVA;
+                    this.importAddresses[dllImports.Imports[i].ImportedName.Value] = this.ImportCurrentRVA + imageBase; // @todo: handle image base better
                     Utils.Write(this.output, actualThunksOffsets[i], 4);
                 }
                 Utils.Write(this.output, 0, 4); // Empty entry

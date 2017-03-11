@@ -154,6 +154,24 @@ namespace Compiler
             }
         }
 
+        public class CallAbsolute : Opcode
+        {
+            private uint address;
+
+            public CallAbsolute(uint address)
+            {
+                this.address = address;
+            }
+
+            public override List<byte> Emit()
+            {
+                List<byte> x86 = new List<byte>();
+                Utils.Write(x86, 0x15ff, 2); // call [?]
+                Utils.Write(x86, this.address, 4);
+                return x86;
+            }
+        }
+
         public class AddEsp : Opcode
         {
             private int offset;

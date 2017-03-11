@@ -229,8 +229,17 @@ namespace Compiler
             {
                 aasm.Add(this.parameters[i].LLAASMEmit());
             }
-            aasm.Add(new AASM.Call(this.llTarget));
-            aasm.Add(new AASM.AddSp(-this.parameters.Count * AASM.AASM.AddressSize));
+            // Call within program.
+            if (this.llTarget != null)
+            {
+                aasm.Add(new AASM.Call(this.llTarget));
+                aasm.Add(new AASM.AddSp(-this.parameters.Count*AASM.AASM.AddressSize));
+            }
+            // Call to import.
+            else
+            {
+                aasm.Add(new AASM.CallImport(this.llImportTarget));
+            }
             aasm.Add(new AASM.PushRetVal());
             return aasm;
         }

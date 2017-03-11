@@ -26,7 +26,7 @@ namespace Compiler
             get { return this.entryPoint; }
         }
 
-        public void Emit()
+        public void Emit(Dictionary<string, uint> importAddresses)
         {
             // Compute each function.
             this.functionEmitters = new List<x86FunctionEmitter>();
@@ -37,7 +37,7 @@ namespace Compiler
                 this.functionEmitters.Add(functionEmitter);
 
                 functionEmitter.ResolveLabels();
-                functionEmitter.CreateOpcodes();
+                functionEmitter.CreateOpcodes(importAddresses);
                 functionEmitter.Optimize();
                 functionEmitter.ResolveOffsesInX86();
             }

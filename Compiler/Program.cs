@@ -147,12 +147,12 @@ struct Blob {
 }
 
 function cheat(alloc:Blob):uint32 {
-    alloc = VAlloc(1,2);
+    int3;
+    alloc = VAlloc(0, 65536, 12288, 4);
     return 0;
 }
 
 function main():uint32 {
-    int3;
     var alloc:Blob;
     cheat(alloc);
     return 0;
@@ -187,7 +187,7 @@ function main():uint32 {
                 peFileBuilder.EmitImports(ll.Imports);
 
                 x86Emitter emitter = new x86Emitter(ll.Functions);
-                emitter.Emit();
+                emitter.Emit(peFileBuilder.ImportAddresses);
 
                 peFileBuilder.EmitCode(emitter.X86, emitter.EntryPoint);
                 peFileBuilder.FinalizePE();
