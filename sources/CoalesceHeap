@@ -18,6 +18,7 @@ struct CoalesceHeapEntry {
 struct CoalesceHeapElement {
 	heap:CoalesceHeap,
 	size:uint32,
+	allocatorType:uint32,
 }
 
 function CoalesceHeapSystemAlloc(elementSize:uint32, elementCount:uint32):CoalesceHeap {
@@ -81,6 +82,7 @@ function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 			
 			(element.heap) = heap;
 			(element.size) = size;
+			(element.allocatorType) = allocatorTypeCoalesceHeap();
 			
 			var result:Ptr;
 			result = element + sizeof CoalesceHeapElement;

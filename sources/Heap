@@ -12,6 +12,18 @@ struct Heap {
 	// fixedHeaps...
 }
 
+struct AllocatorEntry {
+	allocatorType:uint32,
+}
+
+function allocatorTypeFixedHeap():uint32 {
+	return 1;
+}
+
+function allocatorTypeCoalesceHeap():uint32 {
+	return 2;
+}
+
 function HeapFixedHeapSizes():uint32 {
 	return 6;
 }
@@ -57,4 +69,22 @@ function HeapAlloc(heap:Heap, size:uint32):Ptr {
 	}
 	
 	return CoalesceHeapAlloc(heap.coalesceHeap, size);
+}
+
+function HeapFree(ptr:Ptr):uint32 {
+	var entry:AllocatorEntry;
+	entry = ptr - sizeof AllocatorEntry;
+	
+	if ((entry.allocatorType) == allocatorTypeFixedHeap()) {
+		return FixedHeapFree(ptr);
+	}
+	
+	if ((entry.allocatorType) == allocatorTypeCoalesceHeap()) {
+		// @todo
+		return 0;
+	}
+	
+	// Error!
+	int3;int3;int3;int3;
+	return 0;
 }

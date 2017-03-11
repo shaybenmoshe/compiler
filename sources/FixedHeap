@@ -14,11 +14,12 @@ struct FixedHeapBlock {
 
 struct FixedHeapElement {
 	owner:FixedHeapBlock,
+	allocatorType:uint32,
 	next:FixedHeapElement,
 }
 
-function FixedHeapFullElementSize(elementSize:uint32):uint32 {
-	return elementSize + 4; // + 4 for owner.
+function FixedHeapElementExtra():uint32 {
+	return sizeof FixedHeapElement - 4;
 }
 
 function FixedHeapInit(heap:FixedHeap, coalesceHeap:CoalesceHeap, elementSize:uint32, elementCount:uint32):FixedHeap {
@@ -33,7 +34,7 @@ function FixedHeapAddBlock(heap:FixedHeap):FixedHeap {
 	
 	block = CoalesceHeapAlloc(
 		(heap.coalesceHeap),
-		(FixedHeapFullElementSize(heap.elementSize) * (heap.elementCount)) + sizeof FixedHeapBlock
+		(((heap.elementSize) + FixedHeapElementExtra()) * (heap.elementCount)) + sizeof FixedHeapBlock
 	);
 	FixedHeapInitBlock(heap, block);
 	
@@ -53,16 +54,18 @@ function FixedHeapInitBlock(heap:FixedHeap, block:FixedHeapBlock):FixedHeapBlock
 	(block.firstElement) = element;
 	
 	var i:uint32;
-	i = 1; // We start from 1 since we want to treat the last one differently.
+	i = 0;
 	while (i < (heap.elementCount)) {
-		next = element + FixedHeapFullElementSize(heap.elementSize);
+		next = element + (heap.elementSize) + FixedHeapElementExtra();
 		(element.owner) = block;
+		(element.allocatorType) = allocatorTypeFixedHeap();
 		(element.next) = next;
 		element = next;
 		i = i + 1;
 	}
 	
-	(element.owner) = block;
+	// Last doesn't have a next.
+	element = element - ((heap.elementSize) + FixedHeapElementExtra());
 	(element.next) = 0;
 	
 	return block;
@@ -74,7 +77,7 @@ function FixedHeapAllocSingleBlock(block:FixedHeapBlock):Ptr {
 	}
 	
 	var result:Ptr;
-	result = (block.firstElement) + 4; // + 4 for owner.
+	result = (block.firstElement) + FixedHeapElementExtra();
 	
 	(block.firstElement) = (block.firstElement).next;
 	
@@ -107,7 +110,7 @@ function FixedHeapAlloc(heap:FixedHeap):Ptr {
 
 function FixedHeapFree(ptr:Ptr):uint32 {
 	var element:FixedHeapElement;
-	element = ptr - 4; // - 4 for owner.
+	element = ptr - FixedHeapElementExtra();
 	var block:FixedHeapBlock;
 	block = element.owner;
 	(element.next) = block.firstElement;
