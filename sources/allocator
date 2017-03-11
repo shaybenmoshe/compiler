@@ -14,12 +14,8 @@ struct CoalesceHeap {
 	elements:Ptr,
 }
 
-function sizeOfCoalesceHeap():uint32 {
-		return 4 * 4;
-}
-
 function CoalesceHeapHeaderSize(elementCount:uint32):uint32 {
-		return sizeOfCoalesceHeap() + (elementCount * sizeOfCoalesceHeapEntry());
+		return sizeof CoalesceHeap + (elementCount * sizeof CoalesceHeapEntry);
 }
 
 struct CoalesceHeapEntry {
@@ -27,17 +23,9 @@ struct CoalesceHeapEntry {
 	newBlock:uint32,
 }
 
-function sizeOfCoalesceHeapEntry():uint32 {
-		return 4 * 2;
-}
-
 struct CoalesceHeapElement {
 	heap:CoalesceHeap,
 	size:uint32,
-}
-
-function sizeOfCoalesceHeapElement():uint32 {
-		return 4 * 2;
 }
 
 function CoalesceHeapSystemAllocAndInit(elementSize:uint32, elementCount:uint32):CoalesceHeap {
@@ -62,9 +50,9 @@ function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 	var firstEntry:CoalesceHeapEntry;
 	i = 0;
 	
-	size = size + sizeOfCoalesceHeapElement();
+	size = size + sizeof CoalesceHeapElement;
 	
-	firstEntry = heap + sizeOfCoalesceHeap();
+	firstEntry = heap + sizeof CoalesceHeap;
 	
 	while (i < (heap.elementCount)) {
 		var availSize:uint32;
@@ -77,7 +65,7 @@ function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 		
 		// Check if we have enough room.
 		while ((availSize < size) && (j < (heap.elementCount)) && ((entry.used) == 0)) {
-			entry = entry + sizeOfCoalesceHeapEntry();
+			entry = entry + sizeof CoalesceHeapEntry;
 			availSize = availSize + (heap.elementSize);
 			j = j + 1;
 		}
@@ -92,7 +80,7 @@ function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 			k = i;
 			while (k < j) {
 				(entry.used) = 1;
-				entry = entry + sizeOfCoalesceHeapEntry();
+				entry = entry + sizeof CoalesceHeapEntry;
 				k = k + 1;
 			}
 			
@@ -103,13 +91,13 @@ function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 			(element.size) = size;
 			
 			var result:Ptr;
-			result = element + sizeOfCoalesceHeapElement();
+			result = element + sizeof CoalesceHeapElement;
 			
 			return result;
 		}
 		
 		i = i + 1;
-		firstEntry = firstEntry + sizeOfCoalesceHeapEntry();
+		firstEntry = firstEntry + sizeof CoalesceHeapEntry;
 	}
 	return 0;
 }
