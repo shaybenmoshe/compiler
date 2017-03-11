@@ -147,28 +147,23 @@ function main():uint32 {
             input += System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\FixedHeap");
             input += @"
 function main():uint32 {
-    var coalesceHeap:CoalesceHeap;
-    coalesceHeap = CoalesceHeapSystemAlloc(0x1000, 0x10);
-
-    var fixedHeapsPtr:Ptr;
-    fixedHeapsPtr = CoalesceHeapAlloc(coalesceHeap, sizeof FixedHeap);
-
-    var fixedHeap:FixedHeap;
-
-    fixedHeap = FixedHeapInit(fixedHeapsPtr, coalesceHeap, 0xc, 3);
+    var heap:Heap;
+    heap = HeapCreate();
 
     var p:Ptr;
-    p = FixedHeapAlloc(fixedHeap);
+    p = HeapAlloc(heap, 0x10);
     int3;
-    p = FixedHeapAlloc(fixedHeap);
+    p = HeapAlloc(heap, 0x20);
     int3;
-    p = FixedHeapAlloc(fixedHeap);
+    p = HeapAlloc(heap, 0x80);
     int3;
-    p = FixedHeapAlloc(fixedHeap);
+    p = HeapAlloc(heap, 0x120);
     int3;
-    p = FixedHeapAlloc(fixedHeap);
+    p = HeapAlloc(heap, 0x200);
     int3;
-    p = FixedHeapAlloc(fixedHeap);
+    p = HeapAlloc(heap, 0x400);
+    int3;
+    p = HeapAlloc(heap, 0x800);
     int3;
 
     return 0;
@@ -234,12 +229,13 @@ function main():uint32 {
                 Console.ResetColor();
 
                 Console.WriteLine();
-                
-                Console.Write(input.Substring(0, e.Position));
+
+                int startPos = Math.Max(e.Position - 500, 0);
+                Console.Write(input.Substring(startPos, e.Position - startPos));
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Write("<<<!ERROR!>>>");
                 Console.ResetColor();
-                Console.Write(input.Substring(e.Position));
+                Console.Write(input.Substring(e.Position, Math.Min(input.Length - e.Position, 500)));
 
                 Console.ReadKey();
             }

@@ -6,3 +6,55 @@ struct Ptr {
 function HeapSystemAlloc(size:uint32):Ptr {
 	return VirtualAlloc(0, size, 0x3000, 4);
 }
+
+struct Heap {
+	coalesceHeap:CoalesceHeap,
+	// fixedHeaps...
+}
+
+function HeapFixedHeapSizes():uint32 {
+	return 6;
+}
+
+function HeapCreate():Heap {
+    var coalesceHeap:CoalesceHeap;
+    coalesceHeap = CoalesceHeapSystemAlloc(0x1000, 0x20);
+	
+	var heap:Heap;
+	heap = CoalesceHeapAlloc(coalesceHeap, sizeof Heap + ((HeapFixedHeapSizes() + 1) * sizeof FixedHeap)); // +1 to mark last one.
+	(heap.coalesceHeap) = coalesceHeap;
+	
+	var fixedHeap:FixedHeap;
+	fixedHeap = heap + sizeof Heap;
+	
+	FixedHeapInit(fixedHeap, coalesceHeap, 0x10, 0xf0);
+	fixedHeap = fixedHeap + sizeof FixedHeap;
+	FixedHeapInit(fixedHeap, coalesceHeap, 0x40, 0x38);
+	fixedHeap = fixedHeap + sizeof FixedHeap;
+	FixedHeapInit(fixedHeap, coalesceHeap, 0x100, 0xf);
+	fixedHeap = fixedHeap + sizeof FixedHeap;
+	FixedHeapInit(fixedHeap, coalesceHeap, 0x1f0, 8);
+	fixedHeap = fixedHeap + sizeof FixedHeap;
+	FixedHeapInit(fixedHeap, coalesceHeap, 0x380, 3);
+	fixedHeap = fixedHeap + sizeof FixedHeap;
+	FixedHeapInit(fixedHeap, coalesceHeap, 0x740, 2);
+	fixedHeap = fixedHeap + sizeof FixedHeap;
+	
+	(fixedHeap.elementSize) = 0; // Mark last one.
+	
+	return heap;
+}
+
+function HeapAlloc(heap:Heap, size:uint32):Ptr {
+	var fixedHeap:FixedHeap;
+	fixedHeap = heap + sizeof Heap;
+	
+	while ((fixedHeap.elementSize) != 0) {
+		if ((fixedHeap.elementSize) >= size) {
+			return FixedHeapAlloc(fixedHeap);
+		}
+		fixedHeap = fixedHeap + sizeof FixedHeap;
+	}
+	
+	return CoalesceHeapAlloc(heap.coalesceHeap, size);
+}
