@@ -139,30 +139,41 @@ function main():uint32 {
     return 0;
 }
 ";*/
-            string input = @"
+
+
+            string input = "";
+            input += System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\Heap");
+            input += System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\CoalesceHeap");
+            input += System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\FixedHeap");
+            input += @"
 function main():uint32 {
-    var heap:CoalesceHeap;
-    heap = CoalesceHeapSystemAllocAndInit(0x1000, 8);
+    var coalesceHeap:CoalesceHeap;
+    coalesceHeap = CoalesceHeapSystemAlloc(0x1000, 0x10);
+
+    var fixedHeapsPtr:Ptr;
+    fixedHeapsPtr = CoalesceHeapAlloc(coalesceHeap, sizeof FixedHeap);
+
+    var fixedHeap:FixedHeap;
+
+    fixedHeap = FixedHeapInit(fixedHeapsPtr, coalesceHeap, 0xc, 3);
 
     var p:Ptr;
-    p = CoalesceHeapAllocSystem(heap, 0x2000);
+    p = FixedHeapAlloc(fixedHeap);
     int3;
-    p = CoalesceHeapAllocSystem(heap, 0x2000);
+    p = FixedHeapAlloc(fixedHeap);
     int3;
-    p = CoalesceHeapAllocSystem(heap, 0x2000);
+    p = FixedHeapAlloc(fixedHeap);
     int3;
-    p = CoalesceHeapAllocSystem(heap, 0x2000);
+    p = FixedHeapAlloc(fixedHeap);
     int3;
-    p = CoalesceHeapAllocSystem(heap, 0x2000);
+    p = FixedHeapAlloc(fixedHeap);
     int3;
-    p = CoalesceHeapAllocSystem(heap, 0x1000);
+    p = FixedHeapAlloc(fixedHeap);
     int3;
 
     return 0;
 }
 ";
-
-            input = System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\allocator") + input;
 
             try
             {

@@ -1,11 +1,3 @@
-import KERNEL32 VirtualAlloc VirtualAlloc;
-
-struct Ptr {
-}
-
-function HeapSystemAlloc(size:uint32):Ptr {
-	return VirtualAlloc(0, size, 0x3000, 4);
-}
 
 struct CoalesceHeap {
 	next:CoalesceHeap,
@@ -28,7 +20,7 @@ struct CoalesceHeapElement {
 	size:uint32,
 }
 
-function CoalesceHeapSystemAllocAndInit(elementSize:uint32, elementCount:uint32):CoalesceHeap {
+function CoalesceHeapSystemAlloc(elementSize:uint32, elementCount:uint32):CoalesceHeap {
 	var heap:CoalesceHeap;
 	
 	heap = HeapSystemAlloc((elementSize * elementCount) + CoalesceHeapHeaderSize(elementCount));
@@ -121,7 +113,7 @@ function CoalesceHeapAllocNoHeapAlloc(heap:CoalesceHeap, size:uint32):Ptr {
 	return 0;
 }
 
-function CoalesceHeapAllocSystem(heap:CoalesceHeap, size:uint32):Ptr {
+function CoalesceHeapAlloc(heap:CoalesceHeap, size:uint32):Ptr {
 	var result:Ptr;
 	
 	result = CoalesceHeapAllocNoHeapAlloc(heap, size);
@@ -129,6 +121,6 @@ function CoalesceHeapAllocSystem(heap:CoalesceHeap, size:uint32):Ptr {
 		return result;
 	}
 	
-	(heap.next) = CoalesceHeapSystemAllocAndInit((heap.elementSize), (heap.elementCount));
+	(heap.next) = CoalesceHeapSystemAlloc((heap.elementSize), (heap.elementCount));
 	return CoalesceHeapAllocNoNext((heap.next), size);
 }

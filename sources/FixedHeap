@@ -1,0 +1,116 @@
+
+struct FixedHeap {
+	coalesceHeap:CoalesceHeap,
+	elementSize:uint32,
+	elementCount:uint32,
+	block:FixedHeap,
+}
+
+struct FixedHeapBlock {
+	owner:FixedHeap,
+	next:FixedHeapBlock,
+	firstElement:FixedHeapElement,
+}
+
+struct FixedHeapElement {
+	owner:FixedHeapBlock,
+	next:FixedHeapElement,
+}
+
+function FixedHeapFullElementSize(elementSize:uint32):uint32 {
+	return elementSize + 4; // + 4 for owner.
+}
+
+function FixedHeapInit(heap:FixedHeap, coalesceHeap:CoalesceHeap, elementSize:uint32, elementCount:uint32):FixedHeap {
+	(heap.coalesceHeap) = coalesceHeap;
+	(heap.elementSize) = elementSize;
+	(heap.elementCount) = elementCount;
+	return heap;
+}
+
+function FixedHeapAddBlock(heap:FixedHeap):FixedHeap {
+	var block:FixedHeapBlock;
+	
+	block = CoalesceHeapAlloc(
+		(heap.coalesceHeap),
+		(FixedHeapFullElementSize(heap.elementSize) * (heap.elementCount)) + sizeof FixedHeapBlock
+	);
+	FixedHeapInitBlock(heap, block);
+	
+	(block.next) = heap.block;
+	(heap.block) = block;
+	
+	return heap;
+}
+
+function FixedHeapInitBlock(heap:FixedHeap, block:FixedHeapBlock):FixedHeapBlock {
+	(block.owner) = heap;
+	
+	var element:FixedHeapElement;
+	var next:FixedHeapElement;
+	
+	element = block + sizeof FixedHeapBlock;
+	(block.firstElement) = element;
+	
+	var i:uint32;
+	i = 1; // We start from 1 since we want to treat the last one differently.
+	while (i < (heap.elementCount)) {
+		next = element + FixedHeapFullElementSize(heap.elementSize);
+		(element.owner) = block;
+		(element.next) = next;
+		element = next;
+		i = i + 1;
+	}
+	
+	(element.owner) = block;
+	(element.next) = 0;
+	
+	return block;
+}
+
+function FixedHeapAllocSingleBlock(block:FixedHeapBlock):Ptr {
+	if ((block.firstElement) == 0) {
+		return 0;
+	}
+	
+	var result:Ptr;
+	result = (block.firstElement) + 4; // + 4 for owner.
+	
+	(block.firstElement) = (block.firstElement).next;
+	
+	return result;
+}
+
+function FixedHeapAllocNoBlockAlloc(block:FixedHeapBlock):Ptr {
+	while (block != 0) {
+		var result:Ptr;
+		result = FixedHeapAllocSingleBlock(block);
+		if (result != 0) {
+			return result;
+		}
+		
+		block = block.next;
+	}
+	return 0;
+}
+
+function FixedHeapAlloc(heap:FixedHeap):Ptr {
+	var result:Ptr;
+	result = FixedHeapAllocNoBlockAlloc(heap.block);
+	if (result != 0) {
+		return result;
+	}
+	
+	FixedHeapAddBlock(heap);
+	return FixedHeapAllocSingleBlock(heap.block);
+}
+
+function FixedHeapFree(ptr:Ptr):uint32 {
+	var element:FixedHeapElement;
+	element = ptr - 4; // - 4 for owner.
+	var block:FixedHeapBlock;
+	block = element.owner;
+	(element.next) = block.firstElement;
+	(block.firstElement) = element;
+	return 0;
+}

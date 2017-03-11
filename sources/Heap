@@ -1,0 +1,8 @@
+import KERNEL32 VirtualAlloc VirtualAlloc;
+
+struct Ptr {
+}
+
+function HeapSystemAlloc(size:uint32):Ptr {
+	return VirtualAlloc(0, size, 0x3000, 4);
+}
