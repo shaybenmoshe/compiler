@@ -189,6 +189,40 @@ namespace Compiler
         }
     }
 
+    public partial class ImportStatement : Statement
+    {
+        private NameToken dll;
+        private NameToken function;
+        private NameToken importedName;
+
+        public ImportStatement(int position, NameToken dll, NameToken function, NameToken importedName) : base(position)
+        {
+            this.dll = dll;
+            this.function = function;
+            this.importedName = importedName;
+        }
+
+        public NameToken ImportedName
+        {
+            get { return this.importedName; }
+        }
+
+        public NameToken DLL
+        {
+            get { return this.dll; }
+        }
+
+        public NameToken Function
+        {
+            get { return this.function; }
+        }
+
+        public override string ToString()
+        {
+            return "import " + dll + " " + function + " " + importedName + ";";
+        }
+    }
+
     public partial class IfElseStatement : Statement
     {
         private Expression cond;

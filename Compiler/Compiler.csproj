@@ -63,7 +63,11 @@
     <Compile Include="CompilerException.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="x86\Opcodes.cs" />
-    <Compile Include="x86\PEFileBuilder.cs" />
+    <Compile Include="x86\PEFileBuilder\PEFileBuilderFixValues.cs" />
+    <Compile Include="x86\PEFileBuilder\PEFileBuilderImports.cs" />
+    <Compile Include="x86\PEFileBuilder\PEFileBuilderCode.cs" />
+    <Compile Include="x86\PEFileBuilder\PEFileBuilderStart.cs" />
+    <Compile Include="x86\PEFileBuilder\PEFileBuilder.cs" />
     <Compile Include="x86\x86EmitterFunction.cs" />
     <Compile Include="x86\x86Emitter.cs" />
   </ItemGroup>

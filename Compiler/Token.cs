@@ -192,6 +192,7 @@ namespace Compiler
             Else,
             Function,
             Return,
+            Import,
             Int3,
         }
 

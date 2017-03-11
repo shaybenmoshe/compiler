@@ -3,41 +3,9 @@ using System.Collections.Generic;
 
 namespace Compiler
 {
-    public class PEFileBuilder
+    public partial class PEFileBuilder
     {
-        private const uint sectionAlignmentSize = 0x200;
-
-        private const uint codeRVA = 0x1000;
-
-        private uint sizeOfHeaders;
-        private uint codeOffset;
-
-        private int offsetSizeOfOptionalHeaders;
-        private int offsetSizeOfImage;
-        private int offsetSizeOfHeaders;
-        private int offsetCodeOffset;
-        private int offsetCodeDiskSize;
-        private int offsetCodeDiskSize2;
-
-        List<byte> output = new List<byte>();
-        List<byte> code;
-        private uint entryPointInCode;
-
-        public PEFileBuilder(List<byte> code, uint entryPointInCode)
-        {
-            this.code = code;
-            this.entryPointInCode = entryPointInCode;
-        }
-
-        private void alignToSecionAlignment()
-        {
-            while ((this.output.Count & (sectionAlignmentSize - 1)) != 0)
-            {
-                this.output.Add(0);
-            }
-        }
-
-        public List<byte> Emit()
+        public void EmitStart()
         {
             this.EmitDosHeader();
             this.EmitPEHeader();
@@ -46,29 +14,13 @@ namespace Compiler
             this.EmitDataDirectories();
             int afterOptionalHeaders = this.output.Count;
             this.EmitSections();
-            this.alignToSecionAlignment();
-
-            this.sizeOfHeaders = (uint)this.output.Count;
-
-            this.codeOffset = (uint)this.output.Count;
-            this.output.AddRange(this.code);
-            this.alignToSecionAlignment();
-            int afterCode = this.output.Count;
-
-            uint codeSize = (uint)(afterCode - this.codeOffset);
-
-            uint sizeOfImage = codeRVA + codeSize;
-
-            Utils.Rewrite(this.output, (uint)(afterOptionalHeaders - beforeOptionalHeaders), 2, this.offsetSizeOfOptionalHeaders);
-            Utils.Rewrite(this.output, sizeOfImage, 4, this.offsetSizeOfImage);
-            Utils.Rewrite(this.output, this.sizeOfHeaders, 4, this.offsetSizeOfHeaders);
-            Utils.Rewrite(this.output, this.codeOffset, 4, this.offsetCodeOffset);
-            Utils.Rewrite(this.output, codeSize, 4, this.offsetCodeDiskSize);
-            Utils.Rewrite(this.output, codeSize, 4, this.offsetCodeDiskSize2);
-
-            return this.output;
+            this.AlignToSectionAlignment();
+            
+            this.valuesFixers[ValuesFixerKeys.SizeOfOptionalHeaders].Value = (uint)(afterOptionalHeaders - beforeOptionalHeaders);
+            this.valuesFixers[ValuesFixerKeys.SizeOfOptionalHeaders].Size = 2;
+            this.valuesFixers[ValuesFixerKeys.SizeOfHeaders].Value = (uint)this.output.Count;
         }
-
+        
         private void EmitDosHeader()
         {
             this.output.Add((byte)'M');
@@ -95,7 +47,7 @@ namespace Compiler
             Utils.Write(this.output, 0, 4); // Timestamp
             Utils.Write(this.output, 0, 4); // Symbols stuff
             Utils.Write(this.output, 0, 4); // Symbols stuff
-            this.offsetSizeOfOptionalHeaders = this.output.Count;
+            this.valuesFixers[ValuesFixerKeys.SizeOfOptionalHeaders].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 2); // Size of optional headers
 
             uint characteristics = 0;
@@ -110,12 +62,14 @@ namespace Compiler
 
             this.output.Add(0); // Major linker version
             this.output.Add(0); // Minor linker version
-            this.offsetCodeDiskSize2 = this.output.Count;
+            this.valuesFixers[ValuesFixerKeys.CodeDiskSize].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Size of code
             Utils.Write(this.output, 0, 4); // Size of initialized data
             Utils.Write(this.output, 0, 4); // Size of uninitialized data
-            Utils.Write(this.output, this.entryPointInCode + codeRVA, 4); // Entry point
-            Utils.Write(this.output, codeRVA, 4); // Offset of code
+            this.valuesFixers[ValuesFixerKeys.EntryPoint].Targets.Add(this.output.Count);
+            Utils.Write(this.output, 0, 4); // Entry point
+            this.valuesFixers[ValuesFixerKeys.CodeVirtualOffset].Targets.Add(this.output.Count);
+            Utils.Write(this.output, 0, 4); // Offset of code
             Utils.Write(this.output, 0, 4); // Offset of data
             Utils.Write(this.output, 0x00400000, 4); // Image base
             Utils.Write(this.output, 0x1000, 4); // Section alignment
@@ -127,9 +81,9 @@ namespace Compiler
             Utils.Write(this.output, 5, 2); // Major subsystem
             Utils.Write(this.output, 1, 2); // Minor subsystem
             Utils.Write(this.output, 0, 4); // Reserved (Win32 version value)
-            this.offsetSizeOfImage = this.output.Count;
+            this.valuesFixers[ValuesFixerKeys.SizeOfImage].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4);
-            this.offsetSizeOfHeaders = this.output.Count;
+            this.valuesFixers[ValuesFixerKeys.SizeOfHeaders].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4);
             Utils.Write(this.output, 0, 4); // Checksum
             Utils.Write(this.output, 3, 2); // Subsystem = console
@@ -195,12 +149,14 @@ namespace Compiler
             this.output.Add(0);
             this.output.Add(0);
             this.output.Add(0);
-
-            Utils.Write(this.output, (uint)this.code.Count, 4); // Virtual size
-            Utils.Write(this.output, codeRVA, 4); // RVA
-            this.offsetCodeDiskSize = this.output.Count;
+            
+            this.valuesFixers[ValuesFixerKeys.CodeVirtualSize].Targets.Add(this.output.Count);
+            Utils.Write(this.output, 0, 4); // Virtual size
+            this.valuesFixers[ValuesFixerKeys.CodeVirtualOffset].Targets.Add(this.output.Count);
+            Utils.Write(this.output, 0, 4); // RVA
+            this.valuesFixers[ValuesFixerKeys.CodeDiskSize].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Size of raw data
-            this.offsetCodeOffset = this.output.Count;
+            this.valuesFixers[ValuesFixerKeys.CodeRVA].Targets.Add(this.output.Count);
             Utils.Write(this.output, 0, 4); // Offset of code in file
             Utils.Write(this.output, 0, 4); // Relocations
             Utils.Write(this.output, 0, 4); // Line numbers

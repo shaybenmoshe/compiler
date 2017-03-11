@@ -68,7 +68,7 @@ function fact(x:uint32):uint32 {
     return 1;
 }
 ";*/
-            /*string input = @"
+            string input = @"
 struct FibPair {
     x:uint32,
     y:uint32,
@@ -76,7 +76,7 @@ struct FibPair {
 
 function main():uint32 {
     var a:FibPair;
-    //int3;
+    int3;
     (a.x) = 0;
     (a.y) = 1;
     fibPairStep(a);
@@ -95,8 +95,8 @@ function fibPairStep(a:FibPair):uint32 {
     (a.y) = t;
     return 0;
 }
-";*/
-            string input = @"
+";
+            /*string input = @"
 struct A {
     x:uint32,
     y:uint32,
@@ -138,7 +138,25 @@ function main():uint32 {
 
     return 0;
 }
-";
+";*/
+            /*string input = @"
+import Kernel32 VirtualAlloc VAlloc;
+
+struct Blob {
+    x:uint32
+}
+
+function main():uint32 {
+    var alloc:Blob;
+    cheat(alloc);
+    return 0;
+}
+
+function cheat(alloc:Blob):uint32 {
+    alloc = VAlloc(1,2);
+    return 0;
+}
+";*/
 
             try
             {
@@ -163,13 +181,17 @@ function main():uint32 {
                 LL ll = new LL(ast);
                 ll.Emit();
 
-                List<FunctionStatement> functions = ll.Functions;
+                PEFileBuilder peFileBuilder = new PEFileBuilder();
+                peFileBuilder.EmitStart();
+                peFileBuilder.EmitImports(ll.Imports);
 
-                x86Emitter emitter = new x86Emitter(functions);
+                x86Emitter emitter = new x86Emitter(ll.Functions);
                 emitter.Emit();
 
-                PEFileBuilder peFileBuilder = new PEFileBuilder(emitter.X86, emitter.EntryPoint);
-                List<byte> peFile = peFileBuilder.Emit();
+                peFileBuilder.EmitCode(emitter.X86, emitter.EntryPoint);
+                peFileBuilder.FinalizePE();
+                
+                List<byte> peFile = peFileBuilder.Output;
                 System.IO.File.WriteAllBytes("test.exe", peFile.ToArray());
 
 
