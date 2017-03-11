@@ -145,59 +145,8 @@ function main():uint32 {
             input += System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\Heap");
             input += System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\CoalesceHeap");
             input += System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\FixedHeap");
-            input += @"
-function main():uint32 {
-    var heap:Heap;
-    heap = HeapCreate();
-
-    var p1:Ptr;
-    var p2:Ptr;
-    var p3:Ptr;
-    var p4:Ptr;
-    var p5:Ptr;
-    var p6:Ptr;
-    var p7:Ptr;
-    var p8:Ptr;
-    p1 = HeapAlloc(heap, 0x300); // 1
-    int3;
-    p2 = HeapAlloc(heap, 0x300); // 2
-    int3;
-    p3 = HeapAlloc(heap, 0x300); // 3
-    int3;
-    HeapFree(p2);
-    p4 = HeapAlloc(heap, 0x300); // 2
-    int3;
-    p5 = HeapAlloc(heap, 0x300); // 1'
-    int3;
-    HeapFree(p1); // 1
-    HeapFree(p3); // 3
-    HeapFree(p4); // 2
-    p6 = HeapAlloc(heap, 0x300); // 2'
-    int3;
-    p7 = HeapAlloc(heap, 0x300); // 3'
-    int3;
-    p8 = HeapAlloc(heap, 0x300); // 2
-    int3;
-
-    var p:Ptr;
-    /*p = HeapAlloc(heap, 0x10);
-    int3;
-    p = HeapAlloc(heap, 0x20);
-    int3;
-    p = HeapAlloc(heap, 0x80);
-    int3;
-    p = HeapAlloc(heap, 0x120);
-    int3;
-    p = HeapAlloc(heap, 0x200);
-    int3;
-    p = HeapAlloc(heap, 0x400);
-    int3;
-    p = HeapAlloc(heap, 0x800);
-    int3;*/
-
-    return 0;
-}
-";
+            input += System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\mainTestAlloc300");
+            //input += System.IO.File.ReadAllText(@"C:\my-folders\projects\c-sharp\Compiler\sources\mainTestSizes");
 
             try
             {

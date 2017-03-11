@@ -1,0 +1,22 @@
+function main():uint32 {
+    var heap:Heap;
+    heap = HeapCreate();
+	
+    var p:Ptr;
+    p = HeapAlloc(heap, 0x10);
+    int3;
+    p = HeapAlloc(heap, 0x20);
+    int3;
+    p = HeapAlloc(heap, 0x80);
+    int3;
+    p = HeapAlloc(heap, 0x120);
+    int3;
+    p = HeapAlloc(heap, 0x200);
+    int3;
+    p = HeapAlloc(heap, 0x400);
+    int3;
+    p = HeapAlloc(heap, 0x800);
+    int3;
+
+    return 0;
+}
