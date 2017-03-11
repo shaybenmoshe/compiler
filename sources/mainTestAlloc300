@@ -16,7 +16,7 @@ function main():uint32 {
     int3;
     p3 = HeapAlloc(heap, 0x300); // 3
     int3;
-    HeapFree(p2);
+    HeapFree(p2); // 2
     p4 = HeapAlloc(heap, 0x300); // 2
     int3;
     p5 = HeapAlloc(heap, 0x300); // 1'
