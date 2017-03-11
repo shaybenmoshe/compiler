@@ -14,17 +14,41 @@ struct CoalesceHeap {
 	elements:Ptr,
 }
 
+function sizeOfCoalesceHeap():uint32 {
+		return 4 * 4;
+}
+
+function CoalesceHeapHeaderSize(elementCount:uint32):uint32 {
+		return sizeOfCoalesceHeap() + (elementCount * sizeOfCoalesceHeapEntry());
+}
+
 struct CoalesceHeapEntry {
 	used:uint32,
 	newBlock:uint32,
 }
 
+function sizeOfCoalesceHeapEntry():uint32 {
+		return 4 * 2;
+}
+
+struct CoalesceHeapElement {
+	heap:CoalesceHeap,
+	size:uint32,
+}
+
+function sizeOfCoalesceHeapElement():uint32 {
+		return 4 * 2;
+}
+
 function CoalesceHeapInit(elementSize:uint32, elementCount:uint32):CoalesceHeap {
 	var heap:CoalesceHeap;
-	heap = HeapSystemAlloc((elementSize * elementCount) + 0x2000); // @todo: really compute header size...
+	
+	heap = HeapSystemAlloc((elementSize * elementCount) + CoalesceHeapHeaderSize(elementCount));
+	
 	(heap.elementSize) = elementSize;
 	(heap.elementCount) = elementCount;
-	(heap.elements) = heap + 0x2000; // @todo: header size...
+	(heap.elements) = heap + CoalesceHeapHeaderSize(elementCount);
+	
 	return heap;
 }
 
@@ -33,7 +57,9 @@ function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 	var firstEntry:CoalesceHeapEntry;
 	i = 0;
 	
-	firstEntry = heap + (4 * 4); // @todo sizeof CoalesceHeap
+	size = size + sizeOfCoalesceHeapElement();
+	
+	firstEntry = heap + sizeOfCoalesceHeap();
 	
 	while (i < (heap.elementCount)) {
 		var availSize:uint32;
@@ -46,7 +72,7 @@ function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 		
 		// Check if we have enough room.
 		while ((availSize < size) && (j < (heap.elementCount)) && ((entry.used) == 0)) {
-			entry = entry + (4 * 2); // @todo sizeof CoalesceHeapEntry
+			entry = entry + sizeOfCoalesceHeapEntry();
 			availSize = availSize + (heap.elementSize);
 			j = j + 1;
 		}
@@ -61,18 +87,24 @@ function CoalesceHeapAllocNoNext(heap:CoalesceHeap, size:uint32):Ptr {
 			k = i;
 			while (k < j) {
 				(entry.used) = 1;
-				entry = entry + (4 * 2); // @todo sizeof CoalesceHeapEntry
+				entry = entry + sizeOfCoalesceHeapEntry();
 				k = k + 1;
 			}
 			
+			var element:CoalesceHeapElement;
+			element = (heap.elements) + (i * (heap.elementSize));
+			
+			(element.heap) = heap;
+			(element.size) = size;
+			
 			var result:Ptr;
-			result = (heap.elements) + (i * (heap.elementSize));
+			result = element + sizeOfCoalesceHeapElement();
 			
 			return result;
 		}
 		
 		i = i + 1;
-		firstEntry = firstEntry + (4 * 2); // @todo sizeof CoalesceHeapEntry
+		firstEntry = firstEntry + sizeOfCoalesceHeapEntry();
 	}
 	return 0;
 }
